@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Strikepoint</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main class="game-shell">
+      <section class="arena" id="arena">
+        <div class="arena-noise"></div>
+        <div class="grid-lines"></div>
+        <div class="sun-glow"></div>
+
+        <header class="topbar">
+          <div class="team-score ct"><span class="team-dot"></span><strong id="ctScore">08</strong><span>DEFENDERS</span></div>
+          <div class="round-panel"><span>ROUND <b id="round">17</b> / 30</span><strong id="roundTimer">1:55</strong></div>
+          <div class="team-score t"><span>RAIDERS</span><strong id="tScore">08</strong><span class="team-dot"></span></div>
+        </header>
+
+        <aside class="objective-card">
+          <span class="label">CURRENT OBJECTIVE</span>
+          <strong id="objectiveTitle">HOLD B SITE</strong>
+          <p id="objectiveText">Stop the raiders from planting.</p>
+          <div class="objective-progress"><i id="objectiveProgress"></i></div>
+        </aside>
+
+        <div class="location-tag">B / MARKET</div>
+
+        <div class="scene">
+          <div class="building building-left"><span>MERKAZ</span><i></i><i></i><i></i></div>
+          <div class="building building-right"><span>17</span><i></i><i></i></div>
+          <div class="arch"></div>
+          <div class="crate crate-one"></div><div class="crate crate-two"></div><div class="crate crate-three"></div>
+          <div class="van"><span>STRIKE</span></div>
+          <div class="palm"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="ground-shadow"></div>
+          <button class="enemy enemy-a" data-enemy="a" aria-label="Enemy target"><span></span></button>
+          <button class="enemy enemy-b" data-enemy="b" aria-label="Enemy target"><span></span></button>
+          <button class="enemy enemy-c" data-enemy="c" aria-label="Enemy target"><span></span></button>
+          <div class="hit-marker" id="hitMarker">+</div>
+          <div class="crosshair"><i></i><i></i><b></b><em></em></div>
+        </div>
+
+        <section class="kill-feed" id="killFeed"></section>
+
+        <section class="minimap">
+          <div class="map-title">SECTOR // DUSTLINE</div>
+          <div class="map-shape"><i class="site site-a">A</i><i class="site site-b">B</i><b class="player-dot"></b><span class="map-route r1"></span><span class="map-route r2"></span><span class="map-route r3"></span></div>
+          <span class="north">N</span>
+        </section>
+
+        <section class="hud-bottom">
+          <div class="player-panel">
+            <div class="portrait"><span>R</span></div>
+            <div><strong>ROOK</strong><small>DEFENDER</small></div>
+            <div class="health"><b id="health">100</b><span>HP</span><div><i id="healthBar"></i></div></div>
+          </div>
+          <div class="weapon-panel">
+            <span class="weapon-name" id="weaponName">M4A1-S</span>
+            <div class="weapon-glyph">╾━╼</div>
+            <strong><b id="ammo">20</b><small> / 80</small></strong>
+            <span class="firemode">AUTO</span>
+          </div>
+          <button class="buy-button" id="buyButton"><span>⌘</span> LOADOUT <b>$<i id="money">3400</i></b></button>
+        </section>
+
+        <button class="help-button" id="helpButton">?</button>
+        <div class="toast" id="toast"></div>
+      </section>
+
+      <section class="buy-menu" id="buyMenu" aria-hidden="true">
+        <div class="buy-backdrop" id="buyBackdrop"></div>
+        <div class="buy-window">
+          <button class="close" id="closeBuy">×</button>
+          <span class="eyebrow">ARMORY TERMINAL</span>
+          <h1>SELECT YOUR <em>LOADOUT</em></h1>
+          <p class="cash">AVAILABLE FUNDS <b>$<span id="menuMoney">3400</span></b></p>
+          <div class="weapons" id="weapons">
+            <button class="weapon-card selected" data-name="M4A1-S" data-cost="0" data-ammo="20"><span class="card-type">RIFLE / STANDARD</span><b>M4A1-S</b><i>╾━━━━━━━━╼</i><strong>OWNED</strong></button>
+            <button class="weapon-card" data-name="MP9" data-cost="1250" data-ammo="30"><span class="card-type">SMG / MOBILE</span><b>MP9</b><i>╾━━━━━━╼</i><strong>$1,250</strong></button>
+            <button class="weapon-card" data-name="AWP" data-cost="4750" data-ammo="5"><span class="card-type">SNIPER / POWER</span><b>AWP</b><i>╾━━━━━━━━━━╼</i><strong>$4,750</strong></button>
+            <button class="weapon-card" data-name="FAMAS" data-cost="2050" data-ammo="25"><span class="card-type">RIFLE / BURST</span><b>FAMAS</b><i>╾━━━━━━━╼</i><strong>$2,050</strong></button>
+          </div>
+          <div class="utility"><span>UTILITY</span><button id="armor">+ VEST & HELMET <b>$650</b></button><button id="heal">+ MEDKIT <b>$400</b></button></div>
+          <p class="buy-tip">Click a weapon to equip · B to toggle loadout · R to reload</p>
+        </div>
+      </section>
+
+      <section class="start-screen" id="startScreen">
+        <div class="brand-mark">S<span>+</span>P</div>
+        <p>TACTICAL FPS // SINGLE PLAYER SIM</p>
+        <h1>STRIKE<span>POINT</span></h1>
+        <button id="deploy">DEPLOY TO <b>DUSTLINE</b><i>→</i></button>
+        <small>CLICK TARGETS TO FIRE · B LOADOUT · R RELOAD</small>
+      </section>
+      <section class="result-screen" id="resultScreen"><div><span id="resultKicker">ROUND COMPLETE</span><h2 id="resultTitle">SITE SECURED</h2><p id="resultText">Raiders eliminated.</p><button id="nextRound">NEXT ROUND →</button></div></section>
+    </main>
+    <script src="./app.js"></script>
+  </body>
+</html>
