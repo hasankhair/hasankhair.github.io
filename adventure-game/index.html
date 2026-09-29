@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Adventure Game</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="game-container">
+  <h1>Adventure Game</h1>
+  <div id="text">Welcome, brave adventurer!</div>
+
+  <div id="combat" style="display: none;">
+    <p><strong>Enemy:</strong> <span id="enemy-name"></span></p>
+    <p>Enemy Health: <span id="enemy-health"></span></p>
+    <p>Your Health: <span id="player-health"></span></p>
+    <button onclick="attackEnemy()">Attack</button>
+    <button onclick="runFromCombat()">Run</button>
+  </div>
+
+  <div id="inventory">Inventory: <span id="inventory-list">None</span></div>
+  <div id="options" class="btn-container"></div>
+</div>
+
+
+  <script src="script.js"></script>
+</body>
+</html>
