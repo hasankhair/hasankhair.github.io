@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>🌟 Catch the Falling Stars</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: linear-gradient(to top, #001d3d, #003566);
+      color: white;
+      font-family: sans-serif;
+      text-align: center;
+    }
+
+    canvas {
+      display: block;
+      margin: auto;
+      background-color: #000;
+      border: 3px solid white;
+    }
+
+    #score {
+      font-size: 24px;
+      margin-top: 10px;
+    }
+
+    #restartBtn {
+      display: none;
+      margin-top: 15px;
+      font-size: 18px;
+      padding: 10px 20px;
+      border: none;
+      background-color: #ffd60a;
+      color: #000;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    #restartBtn:hover {
+      background-color: #ffc300;
+    }
+  </style>
+</head>
+<body>
+  <h1>🌟 Catch the Falling Stars 🌟</h1>
+  <div id="score">Score: 0 | Level: 1</div>
+  <canvas id="gameCanvas" width="400" height="600"></canvas>
+  <button id="restartBtn">🔄 Restart Game</button>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const scoreDisplay = document.getElementById('score');
+    const restartBtn = document.getElementById('restartBtn');
+
+    let basket, stars, score, level, gameOver;
+
+    function initGame() {
+      basket = {
+        x: 160,
+        y: 550,
+        width: 80,
+        height: 20,
+        speed: 20,
+      };
+
+      stars = [];
+      score = 0;
+      level = 1;
+      gameOver = false;
+      updateHUD();
+      restartBtn.style.display = 'none';
+    }
+
+    function drawBasket() {
+      ctx.fillStyle = 'white';
+      ctx.fillRect(basket.x, basket.y, basket.width, basket.height);
+    }
+
+    function drawStar(star) {
+      ctx.beginPath();
+      ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+      ctx.fillStyle = 'yellow';
+      ctx.fill();
+      ctx.closePath();
+    }
+
+    function createStar() {
+      const radius = 10;
+      stars.push({
+        x: Math.random() * (canvas.width - radius * 2) + radius,
+        y: -radius,
+        radius: radius,
+        speed: 2 + Math.random() * 2 + level * 0.5, // gets faster with level
+      });
+    }
+
+    function updateStars() {
+      for (let i = stars.length - 1; i >= 0; i--) {
+        const star = stars[i];
+        star.y += star.speed;
+
+        // Catch check
+        if (
+          star.y + star.radius > basket.y &&
+          star.x > basket.x &&
+          star.x < basket.x + basket.width
+        ) {
+          stars.splice(i, 1);
+          score += 1;
+
+          // Level up every 5 points
+          if (score % 5 === 0) {
+            level += 1;
+            basket.speed += 1; // increase basket speed too
+          }
+
+          updateHUD();
+        } else if (star.y > canvas.height) {
+          gameOver = true;
+          restartBtn.style.display = 'inline-block';
+        }
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawBasket();
+      stars.forEach(drawStar);
+    }
+
+    function gameLoop() {
+      if (gameOver) {
+        ctx.fillStyle = 'red';
+        ctx.font = '36px sans-serif';
+        ctx.fillText('Game Over', 100, 300);
+        return;
+      }
+
+      updateStars();
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    function updateHUD() {
+      scoreDisplay.textContent = `Score: ${score} | Level: ${level}`;
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft' && basket.x > 0) {
+        basket.x -= basket.speed;
+      } else if (e.key === 'ArrowRight' && basket.x + basket.width < canvas.width) {
+        basket.x += basket.speed;
+      }
+    });
+
+    setInterval(() => {
+      if (!gameOver) createStar();
+    }, 1000);
+
+    restartBtn.addEventListener('click', () => {
+      initGame();
+      gameLoop();
+    });
+
+    // Start the game
+    initGame();
+    gameLoop();
+  </script>
+</body>
+</html>

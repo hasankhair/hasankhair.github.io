@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Library Management App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    h1, h2 {
+      text-align: center;
+    }
+
+    form {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    form input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    form button {
+      padding: 10px 20px;
+      background: #007BFF;
+      border: none;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    form button:hover {
+      background: #0056b3;
+    }
+
+    #book-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    #book-list li {
+      background: #f9f9f9;
+      margin: 8px 0;
+      padding: 10px;
+      border-left: 5px solid #007BFF;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #book-list button {
+      background: #dc3545;
+      border: none;
+      color: white;
+      padding: 6px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    #book-list button:hover {
+      background: #c82333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Library Management</h1>
+    <form id="book-form">
+      <input type="text" id="title" placeholder="Book Title" required />
+      <input type="text" id="author" placeholder="Author" required />
+      <input type="number" id="year" placeholder="Year" required />
+      <button type="submit">Add Book</button>
+    </form>
+
+    <h2>Book List</h2>
+    <ul id="book-list"></ul>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('book-form');
+      const bookList = document.getElementById('book-list');
+
+      let books = JSON.parse(localStorage.getItem('books')) || [];
+
+      function renderBooks() {
+        bookList.innerHTML = '';
+        books.forEach((book, index) => {
+          const li = document.createElement('li');
+          li.innerHTML = `
+            <span>${book.title} by ${book.author} (${book.year})</span>
+            <button onclick="deleteBook(${index})">Delete</button>
+          `;
+          bookList.appendChild(li);
+        });
+      }
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const title = form.title.value.trim();
+        const author = form.author.value.trim();
+        const year = form.year.value.trim();
+
+        if (title && author && year) {
+          books.push({ title, author, year });
+          localStorage.setItem('books', JSON.stringify(books));
+          renderBooks();
+          form.reset();
+        }
+      });
+
+      window.deleteBook = function(index) {
+        books.splice(index, 1);
+        localStorage.setItem('books', JSON.stringify(books));
+        renderBooks();
+      };
+
+      renderBooks();
+    });
+  </script>
+</body>
+</html>

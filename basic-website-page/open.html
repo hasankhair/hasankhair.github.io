@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>First Web Page</title>
+    <script>
+        // Function to display personalized greeting
+        function sayHello() {
+            const name = document.getElementById("username").value;
+            const greeting = document.getElementById("greeting");
+
+            if (name.trim() === "") {
+                greeting.innerHTML = "Please enter your name.";
+            } else {
+                greeting.innerHTML = "Hello, " + name + "!";
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>First Web Page</h1>
+
+    <h2>Learning HTML</h2>
+    <p>HTML means <em>HyperText Markup Language</em></p>
+
+    <ol>
+        <li>One</li>
+        <li>Two</li>
+        <li>Three</li>
+    </ol>
+
+    <p>Go to <a href="https://www.google.com/">Google</a></p>
+
+    <p>HTML logo:</p>
+
+    <p>
+        <a href="https://commons.wikimedia.org/wiki/File:HTML5_logo_and_wordmark.svg#/media/File:HTML5_logo_and_wordmark.svg">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/6/61/HTML5_logo_and_wordmark.svg" alt="HTML logo" width="100" height="120">
+        </a>
+    </p>
+
+    <p><span style="color:rgb(46, 173, 78)">Green</span> colour</p>
+
+    <p><a href="secondpage.html">Second page</a></p>
+
+    <!-- User Input Section -->
+    <h3>Say Hello</h3>
+    <p>Enter your name: <input type="text" id="username"></p>
+    <button onclick="sayHello()">Say Hello</button>
+    <p id="greeting"></p>
+
+</body>
+</html>
