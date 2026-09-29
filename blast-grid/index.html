@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blast Grid — Bomberman</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="Blast Grid home"><span class="brand-mark">✦</span> BLAST GRID</a>
+        <div class="status-chip"><span class="status-dot"></span> ARCADE MODE</div>
+      </header>
+
+      <section class="hero">
+        <div>
+          <p class="eyebrow">SECTOR 01 / THE FOUNDRY</p>
+          <h1>Clear the grid.<br /><em>Own the blast.</em></h1>
+        </div>
+        <p class="hero-copy">Crack crates, dodge sentries, and make every fuse count. One arena. No mercy.</p>
+      </section>
+
+      <section class="game-layout">
+        <aside class="hud-panel left-panel">
+          <div class="stat"><span class="stat-label">SCORE</span><strong id="score">000000</strong></div>
+          <div class="stat"><span class="stat-label">BEST RUN</span><strong id="bestScore">000000</strong></div>
+          <div class="life-row"><span class="stat-label">LIVES</span><div id="lives" class="hearts">● ● ●</div></div>
+          <div class="divider"></div>
+          <div class="mission">
+            <span class="stat-label">OBJECTIVE</span>
+            <p id="objective">Eliminate all sentries</p>
+            <div class="enemy-counter"><span class="enemy-pip"></span><b id="enemyCount">04</b> SENTRIES ACTIVE</div>
+          </div>
+        </aside>
+
+        <div class="arena-wrap">
+          <div class="arena-labels"><span>▲ DANGER RADIUS</span><span id="timer">01:30</span></div>
+          <canvas id="game" width="720" height="720" aria-label="Bomberman game arena"></canvas>
+          <div id="overlay" class="overlay hidden">
+            <p id="overlayKicker">SECTOR CLEARED</p>
+            <h2 id="overlayTitle">NICE WORK!</h2>
+            <p id="overlayText">The grid belongs to you.</p>
+            <button id="restartButton">PLAY AGAIN <span>↻</span></button>
+          </div>
+          <div class="arena-corner corner-a"></div><div class="arena-corner corner-b"></div><div class="arena-corner corner-c"></div><div class="arena-corner corner-d"></div>
+        </div>
+
+        <aside class="hud-panel right-panel">
+          <div class="stat"><span class="stat-label">BOMB STOCK</span><strong id="bombStock">01 <i>×</i></strong></div>
+          <div class="stat"><span class="stat-label">BLAST RANGE</span><strong id="range">02 <i>×</i></strong></div>
+          <div class="divider"></div>
+          <div class="controls">
+            <span class="stat-label">CONTROLS</span>
+            <div class="key-line"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd><span>MOVE</span></div>
+            <div class="key-line"><kbd>SPACE</kbd><span>DROP BOMB</span></div>
+          </div>
+          <button id="newGame" class="new-game">NEW RUN <span>↻</span></button>
+        </aside>
+      </section>
+
+      <footer><span>MOVE WITH WASD OR ARROW KEYS</span><span class="footer-sep">•</span><span>SPACE TO DROP A BOMB</span><span class="footer-sep">•</span><span>GOOD LUCK, OPERATOR</span></footer>
+    </main>
+    <script src="game.js"></script>
+  </body>
+</html>
