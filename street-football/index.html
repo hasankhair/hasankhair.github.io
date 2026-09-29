@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Street Football</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="game-shell">
+      <header>
+        <a class="brand" href="#"><span class="brand-ball">●</span> STREET<br /><em>FOOTBALL</em></a>
+        <div class="match-meta"><span>EXHIBITION MATCH</span><strong id="status">FIRST HALF</strong></div>
+        <button class="sound" id="soundButton" aria-label="Toggle sound">♬</button>
+      </header>
+
+      <section class="scoreboard" aria-label="Match score">
+        <div class="team home"><span class="crest blue">⚡</span><div><small>HOME</small><h2>BLUES</h2></div></div>
+        <div class="score"><strong id="homeScore">0</strong><span>–</span><strong id="awayScore">0</strong><small id="clock">02:00</small></div>
+        <div class="team away"><div><small>AWAY</small><h2>RIVALS</h2></div><span class="crest red">◆</span></div>
+      </section>
+
+      <section class="pitch-wrap">
+        <canvas id="game" width="1100" height="620" aria-label="Playable football field"></canvas>
+        <div class="goal-banner" id="goalBanner">GOAL!</div>
+        <div class="start-overlay" id="startOverlay">
+          <p>QUICK MATCH</p><h1>OWN THE<br />PITCH.</h1>
+          <div class="keys"><span><b>W A S D</b> MOVE</span><span><b>SPACE</b> SHOOT</span></div>
+          <button id="startButton">KICK OFF <span>→</span></button>
+        </div>
+      </section>
+
+      <footer>
+        <div class="controls"><span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> Move</span><span><kbd>SPACE</kbd> Shoot / Tackle</span></div>
+        <button id="restartButton">↻ NEW MATCH</button>
+      </footer>
+    </main>
+    <script src="game.js"></script>
+  </body>
+</html>
