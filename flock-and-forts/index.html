@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#152646" />
+    <title>Flock &amp; Forts</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="game-shell">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="Flock and Forts home">
+          <span class="brand-mark">FF</span>
+          <span>Flock <i>&amp;</i> Forts</span>
+        </a>
+        <div class="level-pill"><span>LEVEL</span><b id="levelLabel">01</b></div>
+        <button class="sound" id="soundBtn" aria-label="Toggle sound">♫</button>
+      </header>
+
+      <section class="game-card" aria-label="Flock and Forts game board">
+        <canvas id="game" width="1280" height="720" aria-label="Slingshot game. Drag the bird backward and release to launch."></canvas>
+        <div class="hud">
+          <div class="goal"><span class="pig-icon">●</span><span id="goalText">3 foes remaining</span></div>
+          <div class="score"><span>SCORE</span><b id="scoreText">000000</b></div>
+        </div>
+        <div class="hint" id="hint">Pull back the <b>Bird</b> and let it fly!</div>
+        <div class="message" id="message" aria-live="polite"></div>
+        <div class="controls">
+          <button id="restartBtn" class="button secondary">↻&nbsp; Restart</button>
+          <button id="nextBtn" class="button primary">Next level <span>→</span></button>
+        </div>
+      </section>
+
+      <footer><span>Drag, aim, release</span><em>•</em><span>Knock down every grumpy green guard</span></footer>
+    </main>
+    <script src="./game.js"></script>
+  </body>
+</html>
