@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BARREL CLIMB — a Donkey Kong tribute</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+  :root{
+    --bg: #0b0b16;
+    --bg2: #16162a;
+    --girder: #ff8c1a;
+    --girder-dark: #a85400;
+    --ladder: #ffe14d;
+    --red: #e8384f;
+    --blue: #2e6fe0;
+    --barrel: #8a4a1e;
+    --barrel-band: #e0b060;
+    --kong: #4a2e17;
+    --kong-light: #6b432a;
+    --pink: #ff6fae;
+    --text: #f4f1ea;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: radial-gradient(ellipse at 50% 0%, var(--bg2), var(--bg) 70%);
+    color: var(--text);
+    font-family: 'Press Start 2P', monospace;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 16px;
+    overflow-x: hidden;
+  }
+
+  h1 {
+    font-size: 22px;
+    letter-spacing: 2px;
+    margin: 8px 0 4px 0;
+    color: var(--girder);
+    text-shadow: 3px 3px 0 var(--girder-dark);
+  }
+
+  .subtitle {
+    font-size: 9px;
+    color: #9b93b0;
+    margin-bottom: 14px;
+    letter-spacing: 1px;
+  }
+
+  .hud {
+    display: flex;
+    justify-content: space-between;
+    width: 640px;
+    max-width: 94vw;
+    font-size: 11px;
+    margin-bottom: 8px;
+    padding: 0 4px;
+  }
+
+  .hud span { color: var(--girder); }
+
+  #gameCanvas {
+    background: #0b0b16;
+    border: 4px solid var(--girder-dark);
+    box-shadow: 0 0 0 2px var(--girder), 0 12px 30px rgba(0,0,0,0.6);
+    max-width: 94vw;
+    height: auto;
+    image-rendering: pixelated;
+  }
+
+  .controls {
+    margin-top: 14px;
+    font-size: 9px;
+    color: #9b93b0;
+    text-align: center;
+    line-height: 1.9;
+  }
+
+  .controls b { color: var(--ladder); }
+
+  #overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(6,6,14,0.88);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    z-index: 10;
+  }
+
+  #overlay.show { display: flex; }
+
+  #overlay h2 {
+    font-size: 26px;
+    margin-bottom: 12px;
+  }
+
+  #overlay p {
+    font-size: 11px;
+    color: #cfc9dd;
+    margin-bottom: 20px;
+  }
+
+  #startBtn {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px;
+    padding: 14px 24px;
+    background: var(--red);
+    color: white;
+    border: none;
+    border-bottom: 4px solid #9c1f30;
+    cursor: pointer;
+    letter-spacing: 1px;
+  }
+
+  #startBtn:active {
+    border-bottom-width: 1px;
+    transform: translateY(3px);
+  }
+
+  .mobile-controls {
+    display: none;
+    margin-top: 14px;
+    gap: 10px;
+  }
+
+  @media (max-width: 700px) {
+    .mobile-controls { display: flex; flex-wrap: wrap; justify-content: center; }
+  }
+
+  .mobile-controls button {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 14px;
+    width: 56px;
+    height: 56px;
+    background: var(--bg2);
+    color: var(--girder);
+    border: 2px solid var(--girder-dark);
+  }
+</style>
+</head>
+<body>
+
+<h1>🦍 BARREL CLIMB</h1>
+<div class="subtitle">get to the top. dodge the barrels. save the day.</div>
+
+<div class="hud">
+  <div>SCORE <span id="scoreVal">0</span></div>
+  <div>LIVES <span id="livesVal">3</span></div>
+  <div>LEVEL <span id="levelVal">1</span></div>
+</div>
+
+<canvas id="gameCanvas" width="640" height="720"></canvas>
+
+<div class="controls">
+  <div><b>← →</b> move &nbsp; <b>↑ ↓</b> climb ladders &nbsp; <b>SPACE</b> jump</div>
+  <div>press <b>R</b> to restart anytime</div>
+</div>
+
+<div class="mobile-controls">
+  <button id="btnLeft">◀</button>
+  <button id="btnUp">▲</button>
+  <button id="btnDown">▼</button>
+  <button id="btnRight">▶</button>
+  <button id="btnJump">JUMP</button>
+</div>
+
+<div id="overlay" class="show">
+  <h2 id="overlayTitle" style="color:var(--girder)">BARREL CLIMB</h2>
+  <p id="overlayText">Climb the girders, dodge the barrels,<br>and rescue the princess at the top!</p>
+  <button id="startBtn">START GAME</button>
+</div>
+
+<script>
+(function(){
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+
+  const scoreEl = document.getElementById('scoreVal');
+  const livesEl = document.getElementById('livesVal');
+  const levelEl = document.getElementById('levelVal');
+  const overlay = document.getElementById('overlay');
+  const overlayTitle = document.getElementById('overlayTitle');
+  const overlayText = document.getElementById('overlayText');
+  const startBtn = document.getElementById('startBtn');
+
+  // ---------- Level geometry ----------
+  const MARGIN = 30;
+  const rows = [660, 560, 460, 360, 260, 170]; // y of platform tops, index0=ground
+  const rowCount = rows.length;
+
+  // ladders: {row (lower row index), x, w} connecting row -> row+1
+  const ladders = [
+    {row:0, x:130, w:34}, {row:0, x:470, w:34},
+    {row:1, x:300, w:34}, {row:1, x:560, w:34},
+    {row:2, x:130, w:34}, {row:2, x:470, w:34},
+    {row:3, x:300, w:34}, {row:3, x:560, w:34},
+    {row:4, x:330, w:34},
+  ];
+
+  const kong = { x: 470, y: rows[5] - 70, w: 60, h: 60 };
+  const princess = { x: 300, y: rows[5] - 46, w: 26, h: 46 };
+
+  // ---------- Player ----------
+  const P_W = 22, P_H = 30;
+  let player, barrels, score, lives, level, running, won, spawnTimer, spawnInterval, elapsed;
+  let keys = {};
+
+  function resetPlayer(){
+    player = {
+      x: 40, y: rows[0] - P_H,
+      w: P_W, h: P_H,
+      vy: 0, onGround: true,
+      onLadder: false, ladderIndex: -1,
+      facing: 1, jumping: false,
+      climbFrame: 0, walkFrame: 0
+    };
+  }
+
+  function resetGame(fullReset){
+    resetPlayer();
+    barrels = [];
+    if (fullReset) { score = 0; lives = 3; level = 1; }
+    spawnTimer = 0;
+    spawnInterval = Math.max(70, 140 - level*8);
+    elapsed = 0;
+    running = true;
+    won = false;
+    updateHud();
+  }
+
+  function updateHud(){
+    scoreEl.textContent = score;
+    livesEl.textContent = lives;
+    levelEl.textContent = level;
+  }
+
+  // ---------- Barrels ----------
+  const B_SIZE = 22;
+  function spawnBarrel(){
+    barrels.push({
+      x: kong.x + 4, y: rows[5] - B_SIZE,
+      row: 5, dir: -1, w: B_SIZE, h: B_SIZE,
+      falling: false, vy: 0, spin: 0,
+      scored: false
+    });
+  }
+
+  function ladderAt(row, x, tolerance){
+    tolerance = tolerance || 6;
+    return ladders.find(l => l.row === row && x + B_SIZE/2 > l.x - tolerance && x + B_SIZE/2 < l.x + l.w + tolerance);
+  }
+
+  function updateBarrels(){
+    for (let i = barrels.length - 1; i >= 0; i--){
+      const b = barrels[i];
+      if (b.falling){
+        b.vy += 0.6;
+        b.y += b.vy;
+        const targetY = rows[b.row] - B_SIZE;
+        if (b.y >= targetY){
+          b.y = targetY;
+          b.falling = false;
+          b.vy = 0;
+        }
+      } else {
+        b.x += b.dir * (2.1 + level*0.15);
+        b.spin += b.dir * 18;
+
+        // check ladder descending: ladders where l.row+1 === b.row (i.e., ladder goes from b.row down to b.row-1)
+        if (b.row > 0){
+          const ld = ladders.find(l => l.row === b.row - 1 && b.x + B_SIZE/2 > l.x - 4 && b.x + B_SIZE/2 < l.x + l.w + 4);
+          if (ld && Math.random() < 0.02){
+            b.falling = true;
+            b.row = b.row - 1;
+          }
+        }
+
+        // bounce off edges
+        if (b.x < MARGIN){ b.x = MARGIN; b.dir = 1; }
+        if (b.x > W - MARGIN - B_SIZE){ b.x = W - MARGIN - B_SIZE; b.dir = -1; }
+      }
+
+      // remove barrels that reach the ground and roll off
+      if (b.row === 0 && (b.x <= MARGIN + 1 || b.x >= W - MARGIN - B_SIZE - 1) && !b.falling){
+        if (Math.random() < 0.01) barrels.splice(i,1);
+      }
+
+      // collision with player -> lose life (unless clearly jumped over)
+      const overlapX = player.x < b.x + b.w && player.x + player.w > b.x;
+      const overlapY = player.y < b.y + b.h && player.y + player.h > b.y;
+      if (overlapX && overlapY){
+        const jumpedOver = player.jumping && (player.y + player.h) < (b.y + b.h*0.45);
+        if (!jumpedOver){
+          loseLife();
+          return;
+        } else if (!b.scored){
+          b.scored = true;
+          score += 100;
+          updateHud();
+        }
+      }
+    }
+  }
+
+  function loseLife(){
+    lives--;
+    updateHud();
+    if (lives <= 0){
+      running = false;
+      showOverlay('GAME OVER', `You scored ${score} points.<br>Better luck next time!`, 'TRY AGAIN');
+    } else {
+      resetPlayer();
+      barrels = [];
+    }
+  }
+
+  // ---------- Player update ----------
+  function currentRow(y){
+    // find row whose platform the player's feet are on
+    for (let r = 0; r < rowCount; r++){
+      if (Math.abs((y + P_H) - rows[r]) < 4) return r;
+    }
+    return -1;
+  }
+
+  function updatePlayer(){
+    const speed = 3.4;
+    let onLad = null;
+
+    // determine if currently within a ladder's x-range near a row boundary
+    for (const l of ladders){
+      const bottomY = rows[l.row];
+      const topY = rows[l.row+1];
+      if (player.x + player.w/2 > l.x - 6 && player.x + player.w/2 < l.x + l.w + 6){
+        if (player.y + player.h >= topY - 6 && player.y + player.h <= bottomY + 6){
+          onLad = l;
+          break;
+        }
+      }
+    }
+
+    if (keys['ArrowUp'] || keys['ArrowDown']){
+      if (onLad){
+        player.onLadder = true;
+        player.x = onLad.x + onLad.w/2 - player.w/2; // snap to ladder
+        const topY = rows[onLad.row+1] - player.h;
+        const bottomY = rows[onLad.row] - player.h;
+        if (keys['ArrowUp']) player.y -= 2.4;
+        if (keys['ArrowDown']) player.y += 2.4;
+        player.y = Math.max(topY, Math.min(bottomY, player.y));
+        player.climbFrame += 0.3;
+        player.vy = 0;
+        player.jumping = false;
+      }
+    } else {
+      player.onLadder = false;
+    }
+
+    if (!player.onLadder){
+      if (keys['ArrowLeft']){ player.x -= speed; player.facing = -1; player.walkFrame += 0.25; }
+      if (keys['ArrowRight']){ player.x += speed; player.facing = 1; player.walkFrame += 0.25; }
+
+      // gravity
+      player.vy += 0.7;
+      player.y += player.vy;
+
+      // platform collision (falling)
+      let landed = false;
+      for (const r of rows){
+        if (player.vy >= 0 && player.y + player.h >= r && player.y + player.h - player.vy <= r + 1){
+          player.y = r - player.h;
+          player.vy = 0;
+          landed = true;
+          break;
+        }
+      }
+      player.onGround = landed;
+      if (landed) player.jumping = false;
+
+      if (keys['Space'] && player.onGround && !player.jumping){
+        player.vy = -12.5;
+        player.jumping = true;
+        player.onGround = false;
+      }
+    }
+
+    player.x = Math.max(MARGIN, Math.min(W - MARGIN - player.w, player.x));
+
+    // win condition: reach princess platform near her
+    if (player.y + player.h <= rows[5] + 2 && Math.abs((player.x) - princess.x) < 60){
+      running = false;
+      won = true;
+      score += 5000;
+      updateHud();
+      showOverlay('YOU DID IT!', `You rescued the princess!<br>Final score: ${score}`, 'PLAY AGAIN');
+    }
+  }
+
+  // ---------- Drawing ----------
+  function drawGirder(y){
+    ctx.fillStyle = getCss('--girder');
+    ctx.fillRect(MARGIN, y, W - MARGIN*2, 14);
+    ctx.fillStyle = getCss('--girder-dark');
+    ctx.fillRect(MARGIN, y + 10, W - MARGIN*2, 4);
+    // diagonal hatch for classic slanted-steel look
+    ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+    ctx.lineWidth = 2;
+    for (let x = MARGIN; x < W - MARGIN; x += 18){
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + 14, y + 14);
+      ctx.stroke();
+    }
+    // rivets
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    for (let x = MARGIN + 10; x < W - MARGIN; x += 40){
+      ctx.beginPath();
+      ctx.arc(x, y + 7, 2, 0, Math.PI*2);
+      ctx.fill();
+    }
+  }
+
+  function drawLadders(){
+    ctx.strokeStyle = getCss('--ladder');
+    ctx.lineWidth = 4;
+    for (const l of ladders){
+      const y1 = rows[l.row];
+      const y2 = rows[l.row+1];
+      ctx.beginPath();
+      ctx.moveTo(l.x, y1); ctx.lineTo(l.x, y2 - 8);
+      ctx.moveTo(l.x + l.w, y1); ctx.lineTo(l.x + l.w, y2 - 8);
+      ctx.stroke();
+      ctx.lineWidth = 3;
+      for (let ry = y1 - 6; ry > y2 - 6; ry -= 12){
+        ctx.beginPath();
+        ctx.moveTo(l.x, ry); ctx.lineTo(l.x + l.w, ry);
+        ctx.stroke();
+      }
+      ctx.lineWidth = 4;
+    }
+  }
+
+  function drawKong(){
+    ctx.save();
+    ctx.translate(kong.x, kong.y);
+    ctx.fillStyle = getCss('--kong');
+    ctx.fillRect(6, 20, 48, 40); // body
+    ctx.fillStyle = getCss('--kong-light');
+    ctx.fillRect(0, 0, 60, 26); // head/chest area
+    ctx.fillStyle = '#2a1a0d';
+    ctx.fillRect(10, 8, 8, 8); // eye
+    ctx.fillRect(30, 8, 8, 8); // eye
+    ctx.fillStyle = getCss('--red');
+    ctx.fillRect(0, 30, 60, 8); // tie/chest band
+    ctx.restore();
+  }
+
+  function drawPrincess(){
+    ctx.save();
+    ctx.translate(princess.x, princess.y);
+    ctx.fillStyle = getCss('--pink');
+    ctx.fillRect(4, 10, 18, 30);
+    ctx.fillStyle = '#ffe0c2';
+    ctx.beginPath();
+    ctx.arc(13, 6, 8, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = '#3a2a1a';
+    ctx.fillRect(4, 0, 18, 6);
+    ctx.restore();
+  }
+
+  function drawBarrel(b){
+    ctx.save();
+    ctx.translate(b.x + b.w/2, b.y + b.h/2);
+    ctx.rotate((b.spin * Math.PI/180));
+    ctx.fillStyle = getCss('--barrel');
+    ctx.fillRect(-b.w/2, -b.h/2, b.w, b.h);
+    ctx.fillStyle = getCss('--barrel-band');
+    ctx.fillRect(-b.w/2, -b.h/2 + 4, b.w, 3);
+    ctx.fillRect(-b.w/2, b.h/2 - 7, b.w, 3);
+    ctx.restore();
+  }
+
+  function drawPlayer(){
+    ctx.save();
+    ctx.translate(player.x, player.y);
+    // legs
+    ctx.fillStyle = getCss('--blue');
+    ctx.fillRect(2, 20, 7, 10);
+    ctx.fillRect(13, 20, 7, 10);
+    // overalls/body
+    ctx.fillStyle = getCss('--red');
+    ctx.fillRect(2, 10, 18, 14);
+    // head
+    ctx.fillStyle = '#ffe0c2';
+    ctx.fillRect(4, 2, 14, 10);
+    // cap
+    ctx.fillStyle = getCss('--red');
+    ctx.fillRect(2, 0, 18, 4);
+    ctx.restore();
+  }
+
+  function getCss(varName){
+    return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    // backdrop grid
+    ctx.fillStyle = '#0b0b16';
+    ctx.fillRect(0,0,W,H);
+
+    for (const y of rows) drawGirder(y);
+    drawLadders();
+    drawKong();
+    drawPrincess();
+    for (const b of barrels) drawBarrel(b);
+    drawPlayer();
+  }
+
+  // ---------- Loop ----------
+  function loop(){
+    if (running){
+      elapsed++;
+      spawnTimer++;
+      if (spawnTimer > spawnInterval){
+        spawnTimer = 0;
+        spawnBarrel();
+      }
+      updatePlayer();
+      if (running) updateBarrels();
+    }
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  // ---------- Input ----------
+  window.addEventListener('keydown', e => {
+    if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code)) e.preventDefault();
+    keys[e.code] = true;
+    if (e.code === 'KeyR') { level = 1; resetGame(true); overlay.classList.remove('show'); }
+  });
+  window.addEventListener('keyup', e => { keys[e.code] = false; });
+
+  function bindHold(id, code){
+    const el = document.getElementById(id);
+    const on = ev => { ev.preventDefault(); keys[code] = true; };
+    const off = ev => { ev.preventDefault(); keys[code] = false; };
+    el.addEventListener('touchstart', on);
+    el.addEventListener('touchend', off);
+    el.addEventListener('mousedown', on);
+    el.addEventListener('mouseup', off);
+    el.addEventListener('mouseleave', off);
+  }
+  bindHold('btnLeft','ArrowLeft');
+  bindHold('btnRight','ArrowRight');
+  bindHold('btnUp','ArrowUp');
+  bindHold('btnDown','ArrowDown');
+  bindHold('btnJump','Space');
+
+  function showOverlay(title, text, btnLabel){
+    overlayTitle.textContent = title;
+    overlayText.innerHTML = text;
+    startBtn.textContent = btnLabel;
+    overlay.classList.add('show');
+  }
+
+  startBtn.addEventListener('click', () => {
+    if (won){
+      level++;
+      resetGame(false); // keep score & lives, advance level
+    } else {
+      level = 1;
+      resetGame(true); // fresh game after game-over or first start
+    }
+    overlay.classList.remove('show');
+  });
+
+  // initial state
+  score = 0; lives = 3; level = 1;
+  resetPlayer();
+  barrels = [];
+  running = false;
+  draw();
+  loop();
+})();
+</script>
+
+</body>
+</html>
