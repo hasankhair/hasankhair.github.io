@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Little Sprout Farm</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky-top:#ffd9a0;
+    --sky-bot:#ffb686;
+    --soil:#8a5a34;
+    --soil-dark:#6b4226;
+    --soil-wet:#4a3018;
+    --grass:#8fbf5a;
+    --grass-dark:#79a94b;
+    --panel:#fff3de;
+    --panel-edge:#e8c78e;
+    --wood:#6b4226;
+    --wood-dark:#4a2e18;
+    --ink:#3f2c1a;
+    --gold:#e8b923;
+    --gold-dark:#b8860f;
+    --leaf:#5a8f3c;
+    --water:#5b9bd5;
+    --danger:#c0503c;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    font-family:'Nunito',sans-serif;
+    background:linear-gradient(180deg,var(--sky-top) 0%, var(--sky-bot) 55%, #f6d9a8 100%);
+    color:var(--ink);
+    display:flex;
+    justify-content:center;
+    padding:18px;
+  }
+  .pixel{ font-family:'Press Start 2P', monospace; }
+  #app{ width:100%; max-width:1180px; }
+
+  /* clouds */
+  .cloud-strip{ position:relative; height:26px; margin-bottom:6px; overflow:hidden; }
+  .cloud{ position:absolute; top:0; opacity:.55; font-size:22px; animation: drift 40s linear infinite; }
+  .cloud.c2{ animation-duration:60s; top:2px; opacity:.4; }
+  .cloud.c3{ animation-duration:50s; top:-4px; opacity:.5; }
+  @keyframes drift{ from{ transform:translateX(-10%);} to{ transform:translateX(1200%);} }
+
+  header{
+    display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between;
+    background:var(--panel); border:4px solid var(--wood); border-radius:var(--radius);
+    padding:12px 16px; margin-bottom:14px; box-shadow:0 4px 0 var(--wood-dark);
+  }
+  .title{
+    font-size:15px; color:var(--wood-dark); letter-spacing:1px; line-height:1.6;
+  }
+  .title span{ color:var(--leaf); }
+  .stats{ display:flex; gap:14px; flex-wrap:wrap; align-items:center; }
+  .stat{ display:flex; align-items:center; gap:6px; font-weight:800; font-size:14px; background:#fffaf0; border:2px solid var(--panel-edge); border-radius:8px; padding:6px 10px; }
+  .stat .icon{ font-size:16px; }
+  .energybar{ width:90px; height:12px; background:#e6d3ab; border:2px solid var(--wood); border-radius:6px; overflow:hidden; }
+  .energyfill{ height:100%; background:linear-gradient(90deg,#8fd94a,#5aa62f); transition:width .3s ease; }
+
+  main{ display:grid; grid-template-columns: 1fr 300px; gap:14px; }
+  @media (max-width:820px){ main{ grid-template-columns: 1fr; } }
+
+  .panel{
+    background:var(--panel); border:4px solid var(--wood); border-radius:var(--radius);
+    box-shadow:0 4px 0 var(--wood-dark); padding:14px;
+  }
+  .panel h2{ margin:0 0 10px; font-size:12px; color:var(--wood-dark); letter-spacing:.5px; }
+
+  #farm{
+    display:grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap:5px;
+    background:var(--grass);
+    border:5px solid var(--wood-dark);
+    border-radius:8px;
+    padding:8px;
+    background-image:
+      repeating-linear-gradient(45deg, rgba(255,255,255,0.05) 0 2px, transparent 2px 10px);
+  }
+  .tile{
+    aspect-ratio:1/1;
+    border-radius:6px;
+    display:flex; align-items:center; justify-content:center; flex-direction:column;
+    position:relative; cursor:pointer; user-select:none;
+    background:var(--grass-dark);
+    border:2px solid rgba(0,0,0,0.15);
+    transition:transform .08s ease, filter .15s ease;
+    font-size:22px;
+  }
+  .tile:hover{ filter:brightness(1.08); transform:translateY(-1px); }
+  .tile:focus-visible{ outline:3px solid #fff; outline-offset:2px; }
+  .tile.tilled{ background:var(--soil); }
+  .tile.watered{ background:var(--soil-wet); }
+  .tile.ready{ box-shadow: inset 0 0 0 3px var(--gold); }
+  .tile .crop{ font-size:22px; transition:transform .2s ease; }
+  .tile.ready .crop{ animation: bob 1s ease-in-out infinite; }
+  @keyframes bob{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-3px);} }
+  .progress{
+    position:absolute; bottom:3px; left:12%; right:12%; height:4px;
+    background:rgba(0,0,0,0.25); border-radius:3px; overflow:hidden;
+  }
+  .progress > div{ height:100%; background:var(--gold); }
+  .droplet{ position:absolute; top:2px; right:3px; font-size:9px; }
+
+  .tools{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px; }
+  .tool-btn{
+    font-family:'Nunito'; font-weight:800; font-size:13px;
+    background:#fffaf0; border:2px solid var(--panel-edge); border-radius:8px;
+    padding:8px 6px; cursor:pointer; display:flex; align-items:center; gap:6px; justify-content:center;
+    transition:all .12s ease;
+  }
+  .tool-btn:hover{ background:#fff1cf; }
+  .tool-btn.active{ background:var(--gold); border-color:var(--gold-dark); color:#4a2e10; box-shadow:0 2px 0 var(--gold-dark); transform:translateY(1px); }
+  .tool-btn:focus-visible{ outline:3px solid var(--wood); outline-offset:1px; }
+
+  .seed-list{ display:flex; flex-direction:column; gap:6px; margin-bottom:12px; }
+  .seed-item{
+    display:flex; align-items:center; justify-content:space-between; gap:6px;
+    background:#fffaf0; border:2px solid var(--panel-edge); border-radius:8px; padding:6px 8px;
+    cursor:pointer; font-weight:700; font-size:12.5px;
+  }
+  .seed-item.active{ background:var(--gold); border-color:var(--gold-dark); }
+  .seed-item .name{ display:flex; align-items:center; gap:6px; }
+  .seed-item .price{ color:var(--wood-dark); }
+
+  .bin{
+    background:#fffaf0; border:2px dashed var(--panel-edge); border-radius:8px; padding:8px; font-size:13px;
+    min-height:40px;
+  }
+  .bin-row{ display:flex; justify-content:space-between; font-weight:700; padding:2px 0; }
+  .bin-total{ margin-top:6px; padding-top:6px; border-top:2px solid var(--panel-edge); display:flex; justify-content:space-between; font-weight:800; color:var(--wood-dark); }
+
+  #sleepBtn{
+    width:100%; margin-top:12px; padding:12px; font-family:'Press Start 2P';
+    font-size:11px; letter-spacing:1px; color:#fff8e8; background:var(--leaf);
+    border:3px solid #3d6b28; border-radius:8px; cursor:pointer; box-shadow:0 3px 0 #33591f;
+  }
+  #sleepBtn:hover{ filter:brightness(1.05); }
+  #sleepBtn:active{ transform:translateY(2px); box-shadow:0 1px 0 #33591f; }
+  #sleepBtn:focus-visible{ outline:3px solid #fff; outline-offset:2px; }
+
+  #toast{
+    position:fixed; top:16px; left:50%; transform:translateX(-50%);
+    background:var(--wood-dark); color:#fff3de; padding:10px 18px; border-radius:8px;
+    font-weight:800; font-size:13px; box-shadow:0 4px 12px rgba(0,0,0,.25);
+    opacity:0; pointer-events:none; transition:opacity .25s ease, top .25s ease; z-index:50;
+  }
+  #toast.show{ opacity:1; top:26px; }
+
+  .hint{ font-size:11.5px; color:#6b5a42; margin-top:8px; line-height:1.4; }
+  .weather{ font-size:18px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="cloud-strip">
+    <div class="cloud c1">☁️</div>
+    <div class="cloud c2">☁️</div>
+    <div class="cloud c3">☁️</div>
+  </div>
+
+  <header>
+    <div class="title pixel">Little Sprout<br><span>FARM</span></div>
+    <div class="stats">
+      <div class="stat"><span class="icon">📅</span><span id="dayStat">Day 1</span></div>
+      <div class="stat weather"><span id="weatherIcon">☀️</span><span id="weatherLabel" style="font-size:12px;">Sunny</span></div>
+      <div class="stat"><span class="icon">💰</span><span id="moneyStat">500 G</span></div>
+      <div class="stat"><span class="icon">⚡</span><div class="energybar"><div class="energyfill" id="energyFill"></div></div></div>
+    </div>
+  </header>
+
+  <main>
+    <div class="panel">
+      <h2 class="pixel">🌾 YOUR FIELD</h2>
+      <div id="farm"></div>
+      <div class="hint">Pick a tool on the right, then click a tile. Hoe empty grass → plant a seed → water it daily → harvest when it glows gold.</div>
+    </div>
+
+    <div class="panel">
+      <h2 class="pixel">🎒 TOOLS</h2>
+      <div class="tools">
+        <button class="tool-btn" data-tool="hoe">🪓 Hoe</button>
+        <button class="tool-btn" data-tool="water">💧 Water</button>
+        <button class="tool-btn" data-tool="harvest">🧺 Harvest</button>
+        <button class="tool-btn" data-tool="clear">🗑️ Clear</button>
+      </div>
+
+      <h2 class="pixel">🌱 SEEDS</h2>
+      <div class="seed-list" id="seedList"></div>
+
+      <h2 class="pixel">📦 SHIPPING BIN</h2>
+      <div class="bin" id="binBox"></div>
+
+      <button id="sleepBtn">🛏️ SLEEP &amp; END DAY</button>
+    </div>
+  </main>
+</div>
+<div id="toast"></div>
+
+<script>
+(function(){
+  const COLS = 8, ROWS = 5;
+  const CROPS = {
+    turnip:  { name:"Turnip",  seed:"🌱", grown:"🥬", seedCost:20, sellPrice:60,  days:3 },
+    carrot:  { name:"Carrot",  seed:"🌱", grown:"🥕", seedCost:25, sellPrice:70,  days:4 },
+    potato:  { name:"Potato",  seed:"🌱", grown:"🥔", seedCost:30, sellPrice:85,  days:5 },
+    corn:    { name:"Corn",    seed:"🌱", grown:"🌽", seedCost:50, sellPrice:150, days:7 },
+  };
+
+  let state = {
+    day: 1,
+    money: 500,
+    energy: 100,
+    maxEnergy: 100,
+    weather: "sunny",
+    tool: "hoe",
+    seed: null,
+    bin: {}, // cropKey -> count
+    tiles: Array.from({length: COLS*ROWS}, () => ({ tilled:false, crop:null, stage:0, watered:false }))
+  };
+
+  const farmEl = document.getElementById('farm');
+  const seedListEl = document.getElementById('seedList');
+  const binBoxEl = document.getElementById('binBox');
+  const toastEl = document.getElementById('toast');
+
+  function toast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(()=> toastEl.classList.remove('show'), 1600);
+  }
+
+  function spendEnergy(n){
+    if(state.energy < n){ toast("⚡ Too tired! Sleep to recover."); return false; }
+    state.energy -= n;
+    return true;
+  }
+
+  function onTileClick(i){
+    const t = state.tiles[i];
+
+    if(state.tool === 'hoe'){
+      if(t.tilled || t.crop){ toast("Already tilled here."); return; }
+      if(!spendEnergy(5)) return;
+      t.tilled = true;
+    }
+    else if(state.tool === 'clear'){
+      if(!t.tilled && !t.crop){ toast("Nothing to clear."); return; }
+      if(!spendEnergy(2)) return;
+      t.tilled = false; t.crop = null; t.stage = 0; t.watered = false;
+    }
+    else if(state.tool && state.tool.startsWith('seed:')){
+      const key = state.tool.split(':')[1];
+      const c = CROPS[key];
+      if(!t.tilled || t.crop){ toast("Needs tilled, empty soil."); return; }
+      if(state.money < c.seedCost){ toast("Not enough gold for that seed."); return; }
+      if(!spendEnergy(3)) return;
+      state.money -= c.seedCost;
+      t.crop = key; t.stage = 0; t.watered = false;
+    }
+    else if(state.tool === 'water'){
+      if(!t.crop){ toast("Nothing planted here."); return; }
+      if(t.watered){ toast("Already watered today."); return; }
+      const c = CROPS[t.crop];
+      if(t.stage >= c.days){ toast("Fully grown \u2014 ready to harvest!"); return; }
+      if(!spendEnergy(3)) return;
+      t.watered = true;
+    }
+    else if(state.tool === 'harvest'){
+      if(!t.crop){ toast("Nothing to harvest here."); return; }
+      const c = CROPS[t.crop];
+      if(t.stage < c.days){ toast("Not ready yet."); return; }
+      if(!spendEnergy(2)) return;
+      state.bin[t.crop] = (state.bin[t.crop] || 0) + 1;
+      toast(`Harvested a ${c.name}! ${c.grown}`);
+      t.crop = null; t.stage = 0; t.watered = false; // soil stays tilled, ready to replant
+    }
+
+    render();
+  }
+
+  function endDay(){
+    // grow watered crops
+    state.tiles.forEach(t=>{
+      if(t.crop){
+        const c = CROPS[t.crop];
+        if(t.watered && t.stage < c.days) t.stage += 1;
+      }
+      t.watered = false;
+    });
+
+    // ship bin
+    let total = 0, shipped = 0;
+    Object.entries(state.bin).forEach(([key,count])=>{
+      const c = CROPS[key];
+      total += c.sellPrice * count;
+      shipped += count;
+    });
+    state.money += total;
+    state.bin = {};
+
+    // new day
+    state.day += 1;
+    state.energy = state.maxEnergy;
+
+    // weather roll
+    const rainy = Math.random() < 0.28;
+    state.weather = rainy ? 'rainy' : 'sunny';
+    if(rainy){
+      state.tiles.forEach(t=>{ if(t.crop) t.watered = true; });
+    }
+
+    if(shipped > 0){
+      toast(`🌙 New day! Shipped ${shipped} crops for ${total} G.`);
+    } else {
+      toast(rainy ? "🌙 New day! Rain will water your crops." : "🌙 A fresh new day begins.");
+    }
+
+    render();
+  }
+
+  function selectTool(tool){
+    state.tool = tool;
+    render();
+  }
+
+  function renderFarm(){
+    farmEl.innerHTML = '';
+    state.tiles.forEach((t,i)=>{
+      const div = document.createElement('div');
+      div.className = 'tile';
+      div.tabIndex = 0;
+      div.setAttribute('role','button');
+      div.setAttribute('aria-label', tileLabel(t));
+
+      if(t.tilled) div.classList.add('tilled');
+      if(t.watered) div.classList.add('watered');
+
+      if(t.crop){
+        const c = CROPS[t.crop];
+        const ready = t.stage >= c.days;
+        if(ready) div.classList.add('ready');
+        const cropSpan = document.createElement('span');
+        cropSpan.className = 'crop';
+        cropSpan.textContent = ready ? c.grown : c.seed;
+        div.appendChild(cropSpan);
+
+        const prog = document.createElement('div');
+        prog.className = 'progress';
+        const fill = document.createElement('div');
+        fill.style.width = Math.min(100, Math.round((t.stage / c.days) * 100)) + '%';
+        prog.appendChild(fill);
+        div.appendChild(prog);
+
+        if(t.watered){
+          const d = document.createElement('span');
+          d.className = 'droplet';
+          d.textContent = '💧';
+          div.appendChild(d);
+        }
+      }
+
+      div.addEventListener('click', ()=> onTileClick(i));
+      div.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); onTileClick(i); }});
+      farmEl.appendChild(div);
+    });
+  }
+
+  function tileLabel(t){
+    if(!t.tilled && !t.crop) return 'Grass, untilled';
+    if(t.crop){
+      const c = CROPS[t.crop];
+      return `${c.name}, stage ${t.stage} of ${c.days}${t.watered ? ', watered' : ''}`;
+    }
+    return 'Tilled soil, empty';
+  }
+
+  function renderTools(){
+    document.querySelectorAll('.tool-btn').forEach(btn=>{
+      btn.classList.toggle('active', state.tool === btn.dataset.tool);
+    });
+  }
+
+  function renderSeeds(){
+    seedListEl.innerHTML = '';
+    Object.entries(CROPS).forEach(([key,c])=>{
+      const row = document.createElement('div');
+      row.className = 'seed-item' + (state.tool === 'seed:'+key ? ' active' : '');
+      row.innerHTML = `<span class="name">${c.seed} ${c.name} <small style="opacity:.7">(${c.days}d)</small></span><span class="price">${c.seedCost} G</span>`;
+      row.addEventListener('click', ()=> selectTool('seed:'+key));
+      seedListEl.appendChild(row);
+    });
+  }
+
+  function renderBin(){
+    const entries = Object.entries(state.bin);
+    if(entries.length === 0){
+      binBoxEl.innerHTML = '<div style="opacity:.6;">Empty. Harvest crops to fill it \u2014 everything ships when you sleep.</div>';
+      return;
+    }
+    let total = 0;
+    let html = '';
+    entries.forEach(([key,count])=>{
+      const c = CROPS[key];
+      const val = c.sellPrice * count;
+      total += val;
+      html += `<div class="bin-row"><span>${c.grown} ${c.name} x${count}</span><span>${val} G</span></div>`;
+    });
+    html += `<div class="bin-total"><span>Ships tonight</span><span>${total} G</span></div>`;
+    binBoxEl.innerHTML = html;
+  }
+
+  function renderHeader(){
+    document.getElementById('dayStat').textContent = 'Day ' + state.day;
+    document.getElementById('moneyStat').textContent = state.money + ' G';
+    document.getElementById('energyFill').style.width = Math.round((state.energy/state.maxEnergy)*100) + '%';
+    const rainy = state.weather === 'rainy';
+    document.getElementById('weatherIcon').textContent = rainy ? '🌧️' : '☀️';
+    document.getElementById('weatherLabel').textContent = rainy ? 'Rainy' : 'Sunny';
+  }
+
+  function render(){
+    renderFarm();
+    renderTools();
+    renderSeeds();
+    renderBin();
+    renderHeader();
+  }
+
+  document.querySelectorAll('.tool-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=> selectTool(btn.dataset.tool));
+  });
+  document.getElementById('sleepBtn').addEventListener('click', endDay);
+
+  render();
+})();
+</script>
+</body>
+</html>
