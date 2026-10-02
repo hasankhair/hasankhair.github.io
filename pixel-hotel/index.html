@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Pixel Hotel</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1a1030;
+    --panel:#241a3d;
+    --panel-light:#2f2252;
+    --ink:#f3ecff;
+    --dim:#a996d6;
+    --neon-pink:#ff3ea5;
+    --neon-cyan:#21e6c1;
+    --sun:#ffd23f;
+    --floor-a:#6a4c93;
+    --floor-b:#5a3f80;
+    --floor-edge:#3f2a66;
+    --shadow-hard:#120a24;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 20% 10%, #3a2568 0%, transparent 50%),
+      radial-gradient(circle at 80% 90%, #2a1a52 0%, transparent 50%),
+      var(--bg);
+    font-family:'VT323', monospace;
+    color:var(--ink);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:18px 10px 40px;
+  }
+  .pixel-panel{
+    background:var(--panel);
+    box-shadow:
+      inset -4px -4px 0 0 var(--shadow-hard),
+      inset 4px 4px 0 0 var(--panel-light);
+    border:2px solid #0c0618;
+    image-rendering:pixelated;
+  }
+  h1{
+    font-family:'Press Start 2P', monospace;
+    font-size:20px;
+    color:var(--sun);
+    text-shadow: 3px 3px 0 var(--neon-pink), 3px 3px 0 #000;
+    letter-spacing:1px;
+    margin:6px 0 2px;
+    text-align:center;
+  }
+  .subtitle{
+    font-size:18px;
+    color:var(--dim);
+    margin-bottom:16px;
+    text-align:center;
+  }
+  .app{
+    display:flex;
+    gap:14px;
+    max-width:1180px;
+    width:100%;
+    flex-wrap:wrap;
+    justify-content:center;
+    align-items:flex-start;
+  }
+
+  /* ---------- Sidebar (catalog) ---------- */
+  .sidebar{
+    width:190px;
+    padding:12px;
+    flex-shrink:0;
+  }
+  .panel-title{
+    font-family:'Press Start 2P', monospace;
+    font-size:11px;
+    color:var(--neon-cyan);
+    margin-bottom:10px;
+    text-shadow:2px 2px 0 #000;
+  }
+  .furni-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    margin-bottom:16px;
+  }
+  .furni-btn{
+    background:var(--panel-light);
+    border:2px solid #0c0618;
+    box-shadow: inset -2px -2px 0 0 var(--shadow-hard), inset 2px 2px 0 0 #4a3878;
+    color:var(--ink);
+    font-size:24px;
+    padding:10px 0 4px;
+    cursor:pointer;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:4px;
+  }
+  .furni-btn span.label{
+    font-size:12px;
+    color:var(--dim);
+  }
+  .furni-btn.active{
+    background:var(--neon-pink);
+    box-shadow: inset -2px -2px 0 0 #7a0038, inset 2px 2px 0 0 #ff8fcb;
+  }
+  .furni-btn.active span.label{color:#2b0016;}
+  .furni-btn:active{transform:translateY(1px);}
+
+  .swatches{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:14px;}
+  .swatch{
+    width:26px;height:26px;
+    border:2px solid #0c0618;
+    cursor:pointer;
+    box-shadow: inset -2px -2px 0 0 rgba(0,0,0,.35);
+  }
+  .swatch.active{outline:2px solid var(--sun); outline-offset:2px;}
+
+  .help-text{
+    font-size:15px;
+    color:var(--dim);
+    line-height:1.35;
+  }
+  .clear-btn{
+    margin-top:12px;
+    width:100%;
+    background:var(--panel-light);
+    color:var(--neon-pink);
+    border:2px solid #0c0618;
+    font-family:'VT323',monospace;
+    font-size:16px;
+    padding:6px 0;
+    cursor:pointer;
+  }
+  .clear-btn:hover{color:var(--sun);}
+
+  /* ---------- Room ---------- */
+  .room-wrap{
+    padding:20px;
+    position:relative;
+    overflow:hidden;
+  }
+  .room-wrap::before{
+    content:"";
+    position:absolute; inset:0;
+    background:repeating-linear-gradient(180deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 3px);
+    pointer-events:none;
+    mix-blend-mode:overlay;
+  }
+  .room{
+    position:relative;
+    width:512px;
+    height:400px;
+  }
+  .tile{
+    position:absolute;
+    width:64px;
+    height:32px;
+    clip-path:polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    cursor:pointer;
+    transition:filter .1s;
+  }
+  .tile:hover{filter:brightness(1.35);}
+  .tile.place-hint:hover{filter:brightness(1.6) drop-shadow(0 0 4px var(--neon-cyan));}
+
+  .wall{
+    position:absolute;
+    pointer-events:none;
+  }
+
+  .avatar{
+    position:absolute;
+    width:36px;
+    transition-property:left, top;
+    transition-timing-function:ease-in-out;
+    pointer-events:none;
+  }
+  .avatar .shadow{
+    position:absolute;
+    bottom:0; left:50%;
+    width:26px; height:10px;
+    background:rgba(0,0,0,.45);
+    border-radius:50%;
+    transform:translateX(-50%);
+  }
+  .avatar .sprite{
+    position:absolute;
+    bottom:8px; left:50%;
+    transform:translateX(-50%);
+    width:20px;
+  }
+  .avatar .head{
+    width:16px;height:14px;
+    background:#ffcf9c;
+    border:2px solid #7a4a26;
+    margin:0 auto;
+    box-shadow: inset -2px -2px 0 rgba(0,0,0,.15);
+  }
+  .avatar .hair{
+    width:16px;height:5px;
+    background:#4a2f1d;
+    margin:0 auto;
+  }
+  .avatar .body{
+    width:18px;height:14px;
+    margin:0 auto;
+    border:2px solid #0c0618;
+    margin-top:-2px;
+  }
+  .avatar .legs{
+    width:16px;height:8px;
+    background:#2b2450;
+    border:2px solid #0c0618;
+    margin:0 auto;
+    display:flex;
+  }
+  .avatar.walking .sprite{
+    animation: bob .3s infinite alternate;
+  }
+  @keyframes bob{ from{transform:translateX(-50%) translateY(0);} to{transform:translateX(-50%) translateY(-3px);} }
+
+  .bubble{
+    position:absolute;
+    bottom:56px;
+    left:50%;
+    transform:translateX(-50%);
+    background:var(--ink);
+    color:#1a1030;
+    font-family:'VT323',monospace;
+    font-size:15px;
+    padding:5px 9px;
+    border:2px solid #0c0618;
+    white-space:nowrap;
+    max-width:160px;
+    white-space:normal;
+    text-align:center;
+    animation: fadein .15s ease-out, fadeout .3s ease-in 2.7s forwards;
+  }
+  .bubble::after{
+    content:"";
+    position:absolute;
+    top:100%; left:50%;
+    transform:translateX(-50%);
+    border:6px solid transparent;
+    border-top-color:var(--ink);
+  }
+  @keyframes fadein{from{opacity:0; transform:translateX(-50%) translateY(4px);} to{opacity:1; transform:translateX(-50%) translateY(0);}}
+  @keyframes fadeout{to{opacity:0;}}
+
+  .furni{
+    position:absolute;
+    width:44px;
+    cursor:pointer;
+    pointer-events:auto;
+  }
+  .furni .fshadow{
+    position:absolute;
+    bottom:0;left:50%;
+    width:34px;height:12px;
+    background:rgba(0,0,0,.4);
+    border-radius:50%;
+    transform:translateX(-50%);
+  }
+  .furni .cube{
+    position:absolute;
+    bottom:8px; left:50%;
+    transform:translateX(-50%);
+    width:34px;height:26px;
+    border:2px solid #0c0618;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:16px;
+    box-shadow: inset -3px -3px 0 rgba(0,0,0,.28), inset 3px 3px 0 rgba(255,255,255,.18);
+  }
+  .furni:hover .cube{filter:brightness(1.15); outline:2px dashed var(--neon-pink); outline-offset:2px;}
+
+  /* ---------- Chat panel ---------- */
+  .chat-panel{
+    width:230px;
+    padding:12px;
+    flex-shrink:0;
+    display:flex;
+    flex-direction:column;
+    height:432px;
+  }
+  .chat-log{
+    flex:1;
+    overflow-y:auto;
+    font-size:16px;
+    line-height:1.3;
+    color:var(--ink);
+    padding-right:4px;
+    margin-bottom:8px;
+  }
+  .chat-log .who{color:var(--neon-cyan);}
+  .chat-log .sys{color:var(--dim); font-style:italic;}
+  .chat-form{
+    display:flex;
+    gap:6px;
+  }
+  .chat-form input{
+    flex:1;
+    background:#120a24;
+    border:2px solid #0c0618;
+    color:var(--ink);
+    font-family:'VT323',monospace;
+    font-size:16px;
+    padding:6px 8px;
+  }
+  .chat-form input:focus{outline:2px solid var(--neon-cyan);}
+  .chat-form button{
+    background:var(--neon-pink);
+    border:2px solid #0c0618;
+    color:#2b0016;
+    font-family:'Press Start 2P',monospace;
+    font-size:10px;
+    padding:0 10px;
+    cursor:pointer;
+  }
+  .chat-form button:active{transform:translateY(1px);}
+
+  @media (max-width: 900px){
+    .app{justify-content:center;}
+    .room{transform:scale(.82); transform-origin:top center; margin:-36px -46px;}
+  }
+</style>
+</head>
+<body>
+
+<h1>🏨 PIXEL HOTEL</h1>
+<div class="subtitle">— Lobby Room —</div>
+
+<div class="app">
+
+  <!-- CATALOG -->
+  <div class="sidebar pixel-panel">
+    <div class="panel-title">FURNI CATALOG</div>
+    <div class="furni-grid" id="furniGrid"></div>
+
+    <div class="panel-title">YOUR COLOR</div>
+    <div class="swatches" id="swatches"></div>
+
+    <div class="help-text">
+      Click the floor to walk.<br><br>
+      Pick a furni item, then click a tile to place it. Click a placed item to pick it back up.
+    </div>
+    <button class="clear-btn" id="clearBtn">CLEAR ROOM</button>
+  </div>
+
+  <!-- ROOM -->
+  <div class="room-wrap pixel-panel">
+    <div class="room" id="room"></div>
+  </div>
+
+  <!-- CHAT -->
+  <div class="chat-panel pixel-panel">
+    <div class="panel-title">ROOM CHAT</div>
+    <div class="chat-log" id="chatLog"></div>
+    <form class="chat-form" id="chatForm">
+      <input id="chatInput" type="text" maxlength="80" placeholder="Say something..." autocomplete="off">
+      <button type="submit">SEND</button>
+    </form>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  const COLS = 8, ROWS = 8, TW = 64, TH = 32;
+  const room = document.getElementById('room');
+  const OFFSET_X = ROWS * TW / 2;
+
+  function screenPos(col, row){
+    const x = (col - row) * TW/2 + OFFSET_X;
+    const y = (col + row) * TH/2;
+    return {x, y};
+  }
+
+  // ---- Floor tiles ----
+  const tiles = [];
+  for(let row=0; row<ROWS; row++){
+    for(let col=0; col<COLS; col++){
+      const {x,y} = screenPos(col,row);
+      const t = document.createElement('div');
+      t.className = 'tile';
+      const checker = (col+row)%2===0;
+      t.style.background = checker ? 'var(--floor-a)' : 'var(--floor-b)';
+      t.style.left = (x) + 'px';
+      t.style.top = (y) + 'px';
+      t.style.zIndex = col+row;
+      t.dataset.col = col;
+      t.dataset.row = row;
+      t.addEventListener('click', ()=> onTileClick(col,row));
+      room.appendChild(t);
+      tiles.push(t);
+    }
+  }
+
+  // ---- Furniture catalog ----
+  const FURNI_TYPES = [
+    {id:'chair', label:'Chair', emoji:'🪑', color:'#ff3ea5'},
+    {id:'table', label:'Table', emoji:'🍱', color:'#21e6c1'},
+    {id:'plant', label:'Plant', emoji:'🌿', color:'#4caf50'},
+    {id:'tv',    label:'TV',    emoji:'📺', color:'#7a5cff'},
+    {id:'juke',  label:'Jukebox', emoji:'🎵', color:'#ffd23f'},
+    {id:'rug',   label:'Rug',   emoji:'🟪', color:'#c14dff'},
+  ];
+  let selectedFurni = null;
+  const furniGrid = document.getElementById('furniGrid');
+  FURNI_TYPES.forEach(f=>{
+    const btn = document.createElement('div');
+    btn.className = 'furni-btn';
+    btn.innerHTML = `${f.emoji}<span class="label">${f.label}</span>`;
+    btn.addEventListener('click', ()=>{
+      const wasActive = btn.classList.contains('active');
+      document.querySelectorAll('.furni-btn').forEach(b=>b.classList.remove('active'));
+      if(wasActive){ selectedFurni = null; }
+      else { btn.classList.add('active'); selectedFurni = f; }
+    });
+    furniGrid.appendChild(btn);
+  });
+
+  // placed furniture: map "col,row" -> {type, el}
+  const placed = {};
+
+  function placeFurni(col,row,type){
+    const key = col+','+row;
+    if(placed[key]) return; // occupied
+    const {x,y} = screenPos(col,row);
+    const el = document.createElement('div');
+    el.className = 'furni';
+    el.style.left = (x + TW/2 - 22) + 'px';
+    el.style.top = (y - 14) + 'px';
+    el.style.zIndex = col+row+1;
+    el.innerHTML = `<div class="fshadow"></div><div class="cube" style="background:${type.color}">${type.emoji}</div>`;
+    el.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      el.remove();
+      delete placed[key];
+    });
+    room.appendChild(el);
+    placed[key] = {type, el};
+  }
+
+  document.getElementById('clearBtn').addEventListener('click', ()=>{
+    Object.values(placed).forEach(p=>p.el.remove());
+    Object.keys(placed).forEach(k=>delete placed[k]);
+  });
+
+  // ---- Avatar ----
+  const SHIRT_COLORS = ['#ff3ea5','#21e6c1','#ffd23f','#7a5cff','#ff7a3d','#4caf50'];
+  let shirtColor = SHIRT_COLORS[0];
+  const swatchWrap = document.getElementById('swatches');
+  SHIRT_COLORS.forEach((c,i)=>{
+    const sw = document.createElement('div');
+    sw.className = 'swatch' + (i===0?' active':'');
+    sw.style.background = c;
+    sw.addEventListener('click', ()=>{
+      shirtColor = c;
+      document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('active'));
+      sw.classList.add('active');
+      avatarEl.querySelector('.body').style.background = c;
+    });
+    swatchWrap.appendChild(sw);
+  });
+
+  let avCol = 3, avRow = 3;
+  const avatarEl = document.createElement('div');
+  avatarEl.className = 'avatar';
+  avatarEl.innerHTML = `
+    <div class="shadow"></div>
+    <div class="sprite">
+      <div class="hair"></div>
+      <div class="head"></div>
+      <div class="body" style="background:${shirtColor}"></div>
+      <div class="legs"></div>
+    </div>`;
+  room.appendChild(avatarEl);
+
+  function placeAvatar(col,row,animate){
+    const {x,y} = screenPos(col,row);
+    avatarEl.style.transitionDuration = animate ? '0ms' : '0ms';
+    avatarEl.style.left = (x + TW/2 - 18) + 'px';
+    avatarEl.style.top = (y - 34) + 'px';
+    avatarEl.style.zIndex = col+row+2;
+  }
+  placeAvatar(avCol, avRow, false);
+
+  function onTileClick(col,row){
+    if(selectedFurni){
+      placeFurni(col,row,selectedFurni);
+      return;
+    }
+    const key = col+','+row;
+    if(placed[key]) return; // can't walk onto furniture
+    const dist = Math.max(Math.abs(col-avCol), Math.abs(row-avRow));
+    const duration = Math.min(1400, Math.max(300, dist*180));
+    avatarEl.style.transitionDuration = duration + 'ms';
+    avatarEl.classList.add('walking');
+    avCol = col; avRow = row;
+    const {x,y} = screenPos(col,row);
+    avatarEl.style.left = (x + TW/2 - 18) + 'px';
+    avatarEl.style.top = (y - 34) + 'px';
+    avatarEl.style.zIndex = col+row+2;
+    clearTimeout(onTileClick._t);
+    onTileClick._t = setTimeout(()=> avatarEl.classList.remove('walking'), duration);
+  }
+
+  // ---- Chat ----
+  const chatLog = document.getElementById('chatLog');
+  const chatForm = document.getElementById('chatForm');
+  const chatInput = document.getElementById('chatInput');
+
+  function logMessage(who, text, sys){
+    const line = document.createElement('div');
+    line.innerHTML = sys ? `<span class="sys">${text}</span>` : `<span class="who">${who}:</span> ${text}`;
+    chatLog.appendChild(line);
+    chatLog.scrollTop = chatLog.scrollHeight;
+  }
+  logMessage(null, 'Welcome to the Lobby! Click the floor to walk around.', true);
+
+  function showBubble(text){
+    const old = avatarEl.querySelector('.bubble');
+    if(old) old.remove();
+    const b = document.createElement('div');
+    b.className = 'bubble';
+    b.textContent = text;
+    avatarEl.appendChild(b);
+    setTimeout(()=>{ if(b.parentNode) b.remove(); }, 3000);
+  }
+
+  chatForm.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const text = chatInput.value.trim();
+    if(!text) return;
+    logMessage('You', text, false);
+    showBubble(text);
+    chatInput.value = '';
+  });
+
+})();
+</script>
+
+</body>
+</html>
