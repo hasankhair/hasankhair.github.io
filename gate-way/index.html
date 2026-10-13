@@ -1,0 +1,154 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>GateWay — Hasan International Airport</title>
+<style>
+:root{--bg:#070b14;--pn:rgba(11,17,30,.84);--ln:#24324f;--tx:#e8eefb;--mu:#8fa1c4;--ac:#4cc9f0;--ok:#4ade80;--wa:#fbbf24;--bd:#f87171;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:light){:root:not([data-theme="dark"]){--pn:rgba(255,255,255,.88);--ln:#c5d0e6;--tx:#111a2e;--mu:#51618a;--ac:#0b78a8}}
+:root[data-theme="light"]{--pn:rgba(255,255,255,.88);--ln:#c5d0e6;--tx:#111a2e;--mu:#51618a;--ac:#0b78a8}
+*{box-sizing:border-box}html,body{height:100%;margin:0;overflow:hidden;background:var(--bg);color:var(--tx);font:13px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#tags{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+.tag{position:absolute;transform:translate(-50%,-100%);padding:1px 6px;border-radius:9px;background:rgba(8,14,26,.8);color:#cfe9ff;border:1px solid #3a5280;font:600 10px ui-monospace,Menlo,monospace;pointer-events:auto;cursor:pointer;white-space:nowrap}
+.tag.em{background:#7f1d1d;border-color:var(--bd);color:#fff;animation:bl .7s infinite}.tag.on{border-color:var(--ac);color:var(--ac)}
+@keyframes bl{50%{opacity:.45}}
+#top{position:fixed;left:8px;right:8px;top:calc(8px + env(safe-area-inset-top,0px));display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--pn);border:1px solid var(--ln);border-radius:12px;padding:7px 10px;backdrop-filter:blur(8px)}
+.brand b{letter-spacing:.2em;color:var(--ac);font-size:15px;display:block}.brand span{color:var(--mu);font-size:10px}
+.st{display:flex;flex-direction:column;min-width:58px}.st i{font-style:normal;color:var(--mu);font-size:9px;letter-spacing:.1em}.st b{font:700 15px ui-monospace,Menlo,monospace}
+.ctl{margin-left:auto;display:flex;gap:5px;flex-wrap:wrap}
+button{background:transparent;color:var(--tx);border:1px solid var(--ln);border-radius:8px;padding:5px 9px;font:inherit;cursor:pointer}
+button:hover{border-color:var(--ac)}button.on{background:var(--ac);color:#04121c;border-color:var(--ac)}button:disabled{opacity:.4;cursor:not-allowed}
+.pn{position:fixed;top:calc(78px + env(safe-area-inset-top,0px));width:250px;max-height:calc(100% - 170px);overflow:auto;background:var(--pn);border:1px solid var(--ln);border-radius:12px;padding:9px;backdrop-filter:blur(8px)}
+#inb{left:8px}#rt{right:8px}
+h3{margin:0 0 6px;font-size:10px;letter-spacing:.14em;color:var(--mu);text-transform:uppercase;display:flex;justify-content:space-between}h3:not(:first-child){margin-top:10px}
+.cd{border:1px solid var(--ln);border-radius:9px;padding:6px 8px;margin-bottom:6px;cursor:pointer}.cd.on{border-color:var(--ac)}.cd.em{border-color:var(--bd);background:rgba(248,113,113,.12)}
+.cd>div:first-child{display:flex;justify-content:space-between;margin-bottom:4px}.cd span,.mu{color:var(--mu)}
+.bar{height:5px;background:var(--ln);border-radius:3px;overflow:hidden;margin-bottom:5px}.bar u{display:block;height:100%;background:var(--ok)}.em .bar u{background:var(--bd)}
+.cd button{width:100%;padding:3px}
+.g{display:grid;grid-template-columns:28px 1fr 56px;gap:6px;align-items:center;margin-bottom:5px}.g b{font:700 12px ui-monospace,monospace}
+.g .bar{margin:0;grid-column:2/4}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+#log{position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));width:min(430px,60%);font:11px ui-monospace,Menlo,monospace;color:var(--mu);pointer-events:none;text-shadow:0 1px 3px #000}
+#log div{margin-top:2px;background:rgba(8,14,26,.55);padding:2px 6px;border-radius:5px;color:#cfdcf5}#log .bad{color:#ffb4b4}#log .good{color:#9ff0bd}
+#alert{position:fixed;left:50%;transform:translateX(-50%);top:calc(70px + env(safe-area-inset-top,0px));background:#78350f;color:#fde68a;border:1px solid var(--wa);border-radius:20px;padding:4px 14px;font-weight:700;display:none;z-index:3}
+@media(max-width:760px){.pn{width:44vw;max-height:36vh;font-size:11px}#log{width:90%;bottom:auto;top:auto;display:none}.st{min-width:44px}.brand span{display:none}}
+</style></head><body>
+<canvas id="c"></canvas><div id="tags"></div><div id="alert"></div>
+<header id="top"><div class="brand"><b>GATEWAY</b><span>Hasan International · HIA</span></div>
+<div class="st"><i>TIME</i><b id="clk">06:00</b></div><div class="st"><i>SCORE</i><b id="sc">0</b></div><div class="st"><i>CASH</i><b id="ca">$500</b></div><div class="st"><i>ON-TIME</i><b id="ot">—</b></div><div class="st"><i>RANK</i><b id="rk" style="font-size:12px">—</b></div>
+<div class="ctl"><button data-a="pause">⏸</button><button data-a="spd" data-n="1" class="on">1×</button><button data-a="spd" data-n="2">2×</button><button data-a="spd" data-n="4">4×</button><button data-a="auto">Auto-ATC</button></div></header>
+<aside class="pn" id="inb"><h3>Inbound holding <em id="hc"></em></h3><div id="il"></div></aside>
+<aside class="pn" id="rt"><h3>Gates</h3><div id="gl"></div><h3>Selected aircraft</h3><div id="sl"></div></aside>
+<div id="log"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(()=>{
+const $=s=>document.querySelector(s),T=THREE,rnd=Math.random;
+const cv=$('#c'),rn=new T.WebGLRenderer({canvas:cv,antialias:true});rn.setPixelRatio(Math.min(devicePixelRatio,2));
+const sc=new T.Scene();sc.background=new T.Color(0x060a14);sc.fog=new T.FogExp2(0x060a14,.004);
+const cam=new T.PerspectiveCamera(50,1,.5,1200);
+const hemi=new T.HemisphereLight(0x7f95d8,0x121828,.9);sc.add(hemi);
+const dl=new T.DirectionalLight(0xa9bcff,.7);dl.position.set(-60,100,50);sc.add(dl);
+const box=(w,h,d,c,x,y,z,bs)=>{const m=new T.Mesh(new T.BoxGeometry(w,h,d),bs?new T.MeshBasicMaterial({color:c}):new T.MeshLambertMaterial({color:c}));m.position.set(x,y,z);sc.add(m);return m};
+const pts=(a,c,s)=>{const g=new T.BufferGeometry().setFromPoints(a);sc.add(new T.Points(g,new T.PointsMaterial({color:c,size:s,sizeAttenuation:true})))};
+// ---- airport
+const GX=i=>-25+i*10,GN=['A1','A2','A3','B1','B2','B3'];
+box(700,.2,500,0x0c121e,0,-.1,0);box(96,.1,28,0x161f31,0,.05,6);
+// runway with markings
+const k=document.createElement('canvas');k.width=1024;k.height=64;const x=k.getContext('2d');x.fillStyle='#10151f';x.fillRect(0,0,1024,64);x.fillStyle='#d8dfef';
+for(let i=0;i<14;i++)x.fillRect(150+i*55,30,30,4);for(let j=0;j<6;j++){x.fillRect(14,8+j*8,50,4);x.fillRect(960,8+j*8,50,4)}
+const rw=new T.Mesh(new T.PlaneGeometry(220,9),new T.MeshBasicMaterial({map:new T.CanvasTexture(k)}));rw.rotation.x=-Math.PI/2;rw.position.set(0,.08,-30);sc.add(rw);
+const tw=0x1b2438;box(134,.1,5,tw,-10,.06,-12);box(5,.1,20,tw,45,.06,-21);box(5,.1,22,tw,-72,.06,-23);box(134,.02,.25,0xfacc15,-10,.12,-12,1);
+const rl=[],tl=[];for(let i=-110;i<=110;i+=6){rl.push(new T.Vector3(i,.3,-34.8),new T.Vector3(i,.3,-25.2))}for(let i=-76;i<=56;i+=8){tl.push(new T.Vector3(i,.3,-9.4),new T.Vector3(i,.3,-14.6))}
+pts(rl,0xfff1b0,1.6);pts(tl,0x4aa8ff,1.2);
+const gm=[];GN.forEach((n,i)=>{const gx=GX(i);box(4,.1,17,tw,gx,.06,-3.5);box(2.4,1.8,9,0x4a5575,gx,3.2,14.5);
+const m=new T.Mesh(new T.BoxGeometry(8,.12,12),new T.MeshBasicMaterial({color:0x4ade80,transparent:true,opacity:.35}));m.position.set(gx,.1,5);sc.add(m);gm.push(m)});
+box(96,8,10,0x1c2438,0,4,24);box(94,1.6,.2,0xffd27a,0,4.5,18.9,1);
+box(2.4,22,2.4,0x2a3350,62,11,22);box(6,3,6,0x7fd8ff,62,23.5,22,1);
+const bc=new T.Mesh(new T.SphereGeometry(.8),new T.MeshBasicMaterial({color:0xff3b3b}));bc.position.set(62,26.5,22);sc.add(bc);
+const rain=new T.Points(new T.BufferGeometry(),new T.PointsMaterial({color:0x9bb7ff,size:.6,transparent:true,opacity:.6}));{const a=new Float32Array(2400);for(let i=0;i<2400;i+=3){a[i]=rnd()*240-120;a[i+1]=rnd()*60;a[i+2]=rnd()*140-80}rain.geometry.setAttribute('position',new T.BufferAttribute(a,3));rain.visible=false;rain.frustumCulled=false;sc.add(rain)}
+const ring=new T.Mesh(new T.RingGeometry(7,8,40),new T.MeshBasicMaterial({color:0x4cc9f0,side:2}));ring.rotation.x=-Math.PI/2;ring.visible=false;sc.add(ring);
+// ---- aircraft
+const AIR=[['GFL',0x4cc9f0],['HSN',0xf97316],['MAS',0xef4444],['AIA',0xa855f7],['SKY',0x22c55e]];
+function mkPlane(c){const g=new T.Group(),m=new T.MeshLambertMaterial({color:0xe8edf5}),a=new T.MeshLambertMaterial({color:c});
+const f=new T.Mesh(new T.CylinderGeometry(1,1,10,10),m);f.rotation.z=Math.PI/2;g.add(f);
+const n=new T.Mesh(new T.SphereGeometry(1,10,8),m);n.position.x=5;g.add(n);
+const mk=(w,h,d,mt,px,py,pz)=>{const q=new T.Mesh(new T.BoxGeometry(w,h,d),mt);q.position.set(px,py,pz);g.add(q)};
+mk(2.6,.25,14,m,.5,0,0);mk(1.8,2.6,.25,a,-4.5,1.5,0);mk(1.4,.2,4.5,m,-4.5,.2,0);mk(1.6,.9,.9,a,.8,-.8,3.5);mk(1.6,.9,.9,a,.8,-.8,-3.5);
+const b=new T.Mesh(new T.SphereGeometry(.3),new T.MeshBasicMaterial({color:0xff4040}));b.position.y=1.1;g.add(b);g.scale.setScalar(.9);return g}
+// ---- state
+let planes=[],nid=1,gates=GN.map(()=>({s:'free',p:null})),rwy=false,score=0,cash=500,spd=1,paused=false,simT=0,storm=0,stormT=60,dep=0,ot=0,land=0,dv=0,auto=false,sel=null,spawnT=1,follow=false,logs=[];
+const K=()=>storm>0?.7:1,W=(x,y,z,s,cb)=>({p:new T.Vector3(x,y,z),s,cb});
+const log=(m,c)=>{const t=simT|0;logs.push(`<div class="${c||''}">${String(6+(t/60|0)).padStart(2,'0')}:${String(t%60).padStart(2,'0')} ${m}</div>`);if(logs.length>5)logs.shift();$('#log').innerHTML=logs.join('')};
+function addPlane(st){const [pre,col]=AIR[rnd()*5|0],p={id:nid++,call:pre+(100+rnd()*899|0),g:mkPlane(col),st,mx:70+rnd()*60,path:[],gate:-1,hw:0,emerg:false,a:rnd()*6.28};
+p.fuel=p.mx;p.tr=42+(p.id%3)*6;p.r=150;p.al=18+(p.id%4)*3.5;p.g.userData.p=p;sc.add(p.g);
+p.tag=document.createElement('div');p.tag.className='tag';p.tag.textContent=p.call;p.tag.onclick=()=>pick(p);$('#tags').appendChild(p.tag);planes.push(p);return p}
+function spawn(){const p=addPlane('hold');log(`${p.call} inbound, requesting landing`)}
+function park(gi){const p=addPlane('park');p.gate=gi;gates[gi].s='occ';gates[gi].p=p;p.t=p.tt=8+rnd()*10;p.g.position.set(GX(gi),0,5);p.g.rotation.y=-Math.PI/2}
+function drop(p){sc.remove(p.g);p.tag.remove();planes=planes.filter(q=>q!==p);if(sel===p)pick(null)}
+function clear(p,q){if(p.st!=='hold')return;if(rwy){q||log('Runway occupied — wait','bad');return}
+const gi=gates.findIndex(g=>g.s==='free');if(gi<0){q||log('No free gate for '+p.call,'bad');return}
+gates[gi]={s:'res',p};p.gate=gi;rwy=true;p.st='land';p.emerg&&(p.emerg=2);const gx=GX(gi);
+p.path=[W(-105,15,-30,34),W(-62,.4,-30,26),W(30,0,-30,12,()=>{rwy=false;p.st='taxi'}),W(45,0,-30,8),W(45,0,-12,8),W(gx,0,-12,8),W(gx,0,5,6,arrive)];log(`${p.call} cleared to land → gate ${GN[gi]}`,'good')}
+function arrive(p){p.st='park';gates[p.gate].s='occ';p.t=p.tt=12+rnd()*8;score+=100+(p.emerg?200:0);cash+=120;land++;log(`${p.call} at gate ${GN[p.gate]}`,'good')}
+function pushback(p){const gx=GX(p.gate);gates[p.gate]={s:'free',p:null};p.st='taxiout';
+p.path=[W(gx,0,-12,7),W(-70,0,-12,12,()=>{p.st='hs';p.hw=0})];log(`${p.call} pushback, requesting departure`)}
+function depart(p){rwy=true;p.st='dep';p.path=[W(-72,0,-30,8),W(-20,0,-30,24),W(35,0,-30,40),W(95,12,-30,48,()=>rwy=false),W(190,55,-30,55,()=>{score+=150;cash+=180;dep++;p.hw<12&&ot++;log(p.call+' departed','good');drop(p)})];log(p.call+' cleared for takeoff')}
+function mv(p,dt){const w=p.path[0];if(!w)return;
+if(p.st==='taxi'||p.st==='taxiout')for(const q of planes)if(q!==p&&q.id<p.id&&(q.st==='taxi'||q.st==='taxiout'||q.st==='hs')&&q.g.position.distanceTo(p.g.position)<11)return;
+const d=w.p.clone().sub(p.g.position),L=d.length(),s=w.s*K()*dt;
+if(L<=s){p.g.position.copy(w.p);p.path.shift();w.cb&&w.cb(p);return}
+d.divideScalar(L);p.g.position.addScaledVector(d,s);const r=p.g.rotation,e=Math.min(1,dt*4);let dy=-Math.atan2(d.z,d.x)-r.y;dy=Math.atan2(Math.sin(dy),Math.cos(dy));
+r.y+=dy*e;r.z+=(Math.atan2(d.y,Math.hypot(d.x,d.z))-r.z)*e;r.x*=1-Math.min(1,dt*3)}
+function sim(dt){simT+=dt;
+spawnT-=dt;if(spawnT<=0&&planes.filter(p=>p.st==='hold').length<7){spawn();spawnT=Math.max(4,9-simT/90)+rnd()*4}
+stormT-=dt;if(stormT<=0&&storm<=0){storm=25;stormT=70+rnd()*50;log('⛈ Storm cell over field — ops slowed','bad')}else if(storm>0){storm-=dt;if(storm<=0)log('Storm has passed','good')}
+for(const p of planes.slice()){
+if(p.st==='hold'){p.fuel-=dt*(storm>0?1.4:1);p.a+=dt*.16;p.r+=(p.tr-p.r)*Math.min(1,dt);
+p.g.position.set(Math.cos(p.a)*p.r,p.al,-30+Math.sin(p.a)*p.r);p.g.rotation.y=-Math.atan2(Math.cos(p.a),-Math.sin(p.a));p.g.rotation.x=.3;
+if(!p.emerg&&p.fuel<p.mx*.3){p.emerg=1;log(`MAYDAY ${p.call} low fuel!`,'bad')}
+if(p.fuel<=0){score-=400;dv++;log(`${p.call} diverted — fuel out (-400)`,'bad');drop(p)}}
+else if(p.st==='park'){p.t-=dt;if(p.t<=0)pushback(p)}
+else if(p.st==='hs'){p.hw+=dt;const f=planes.filter(q=>q.st==='hs').sort((a,b)=>a.id-b.id)[0];
+const em=planes.some(q=>q.st==='hold'&&q.emerg===1&&gates.some(g=>g.s==='free'));if(!rwy&&f===p&&!(em&&p.hw<20))depart(p)}
+else mv(p,dt)}
+if(auto&&!rwy){const h=planes.filter(p=>p.st==='hold').sort((a,b)=>a.fuel/a.mx-b.fuel/b.mx)[0];if(h&&(h.emerg||!planes.some(q=>q.st==='hs')))clear(h,1)}}
+// ---- camera & input
+let th=.5,ph=.95,rad=175;const tg=new T.Vector3(0,0,-6),ptr=new Map(),ray=new T.Raycaster();let mvd=0,pd=0;
+cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);ptr.set(e.pointerId,e);mvd=0;pd=0;if(ptr.size==2){const[a,b]=[...ptr.values()];pd=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY)}});
+cv.addEventListener('pointermove',e=>{if(!ptr.has(e.pointerId))return;const o=ptr.get(e.pointerId);ptr.set(e.pointerId,e);
+if(ptr.size==2){const[a,b]=[...ptr.values()],d=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);if(pd)rad=Math.min(380,Math.max(30,rad*pd/d));pd=d;mvd=9}
+else{const dx=e.clientX-o.clientX,dy=e.clientY-o.clientY;mvd+=Math.abs(dx)+Math.abs(dy);if(e.shiftKey||e.buttons==2){tg.x-=dx*rad*.0012*Math.cos(th);tg.z+=dx*rad*.0012*Math.sin(th);tg.x-=dy*rad*.0012*Math.sin(th);tg.z-=dy*rad*.0012*Math.cos(th)}else{th-=dx*.006;ph=Math.min(1.45,Math.max(.2,ph-dy*.005))}follow=false}});
+cv.addEventListener('pointerup',e=>{ptr.delete(e.pointerId);if(mvd<6&&!ptr.size){const r=cv.getBoundingClientRect();ray.setFromCamera(new T.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1),cam);
+const h=ray.intersectObjects(planes.map(p=>p.g),true)[0];let o=h&&h.object;while(o&&!o.userData.p)o=o.parent;pick(o?o.userData.p:null)}});
+cv.addEventListener('contextmenu',e=>e.preventDefault());cv.addEventListener('wheel',e=>{e.preventDefault();rad=Math.min(380,Math.max(30,rad*(1+e.deltaY*.001)))},{passive:false});
+function pick(p){sel=p;if(!p)follow=false;ui()}
+// ---- UI
+const ST={hold:'Holding',land:'Landing',taxi:'Taxi to gate',park:'Turnaround',taxiout:'Pushback',hs:'Hold short rwy',dep:'Departing'},RK=[[0,'Apron Trainee'],[600,'Ground Ctrl'],[1500,'Approach Lead'],[3000,'Tower Chief'],[5000,'Airport Legend']];
+function ui(){const h=planes.filter(p=>p.st==='hold').sort((a,b)=>a.fuel/a.mx-b.fuel/b.mx);
+$('#hc').textContent=h.length+'/7';
+$('#il').innerHTML=h.map(p=>`<div class="cd ${p.emerg?'em':''} ${p===sel?'on':''}" data-a="sel" data-id="${p.id}"><div><b>${p.call}${p.emerg?' ⚠':''}</b><span>${Math.max(0,Math.ceil(p.fuel))}s fuel</span></div><div class="bar"><u style="width:${Math.max(0,p.fuel/p.mx*100)}%"></u></div><button data-a="clr" data-id="${p.id}">Clear to land</button></div>`).join('')||'<span class="mu">Airspace clear.</span>';
+const C={free:'#4ade80',res:'#fbbf24',occ:'#f87171'};
+$('#gl').innerHTML=gates.map((g,i)=>`<div class="g"><b>${GN[i]}</b><span><i class="dot" style="background:${C[g.s]}"></i>${g.p?g.p.call:'free'}</span><span class="mu">${g.s==='occ'&&g.p&&g.p.tt?Math.ceil(g.p.t)+'s':''}</span>${g.s==='occ'&&g.p&&g.p.tt?`<div class="bar"><u style="width:${(1-g.p.t/g.p.tt)*100}%"></u></div>`:''}</div>`).join('');
+const p=sel;$('#sl').innerHTML=p?`<b>${p.call}</b> · ${ST[p.st]}<br><span class="mu">Gate ${p.gate>=0?GN[p.gate]:'—'} · fuel ${p.st==='hold'?Math.ceil(p.fuel)+'s':'ok'}</span><div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap">${p.st==='hold'?`<button data-a="clr" data-id="${p.id}">Clear to land</button>`:''}${p.st==='park'?`<button data-a="exp" ${cash<150?'disabled':''}>Expedite $150</button>`:''}<button data-a="fol" class="${follow?'on':''}">Follow</button></div>`:'<span class="mu">Click an aircraft or its tag.</span>';
+$('#clk').textContent=String(6+(simT/60|0)).padStart(2,'0')+':'+String(simT%60|0).padStart(2,'0');$('#sc').textContent=score;$('#ca').textContent='$'+cash;$('#ot').textContent=dep?Math.round(ot/dep*100)+'%':'—';
+$('#rk').textContent=RK.filter(r=>score>=r[0]).pop()[1];
+const al=$('#alert'),n=h.filter(p=>p.emerg).length;al.style.display=storm>0||n?'block':'none';al.textContent=(storm>0?'⛈ STORM — slower ops, +40% fuel burn':'')+(storm>0&&n?'  ·  ':'')+(n?`⚠ ${n} fuel emergenc${n>1?'ies':'y'}`:'')}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,p=planes.find(q=>q.id==b.dataset.id);
+if(a==='sel')pick(p);else if(a==='clr'){pick(p);clear(p)}else if(a==='exp'&&sel&&sel.st==='park'&&cash>=150){cash-=150;sel.t=Math.min(sel.t,2);log(sel.call+' turnaround expedited')}
+else if(a==='fol')follow=!follow;else if(a==='pause'){paused=!paused;b.classList.toggle('on',paused)}
+else if(a==='spd'){spd=+b.dataset.n;document.querySelectorAll('[data-a=spd]').forEach(x=>x.classList.toggle('on',x===b))}
+else if(a==='auto'){auto=!auto;b.classList.toggle('on',auto);log('Auto-ATC '+(auto?'engaged':'off'))}ui()});
+// ---- loop
+function size(){const w=innerWidth,h=innerHeight;rn.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}addEventListener('resize',size);size();
+park(0);park(3);spawn();spawn();log('Welcome to GateWay. Clear inbound flights before they run dry.');
+let last=performance.now(),ut=0,fl=0;const v=new T.Vector3();
+(function loop(now){requestAnimationFrame(loop);const rd=Math.min(.05,(now-last)/1000);last=now;if(!paused)sim(rd*spd);
+if(follow&&sel)tg.lerp(sel.g.position,.12);
+cam.position.set(tg.x+rad*Math.sin(ph)*Math.sin(th),tg.y+rad*Math.cos(ph),tg.z+rad*Math.sin(ph)*Math.cos(th));cam.lookAt(tg);
+bc.visible=(now/500|0)%2==0;
+const sf=storm>0;rain.visible=sf;sc.fog.density=sf?.008:.004;
+if(sf){const a=rain.geometry.attributes.position;for(let i=1;i<a.array.length;i+=3){a.array[i]-=rd*70;if(a.array[i]<0)a.array[i]=60}a.needsUpdate=true;
+fl=rnd()<.01?1:fl*.9;hemi.intensity=.9+fl*2.5}else hemi.intensity=.9;
+gm.forEach((m,i)=>m.material.color.set({free:0x4ade80,res:0xfbbf24,occ:0xf87171}[gates[i].s]));
+const W_=innerWidth,H_=innerHeight;for(const p of planes){v.copy(p.g.position);v.y+=3;v.project(cam);const t=p.tag;t.style.display=v.z>1?'none':'block';t.style.left=(v.x*.5+.5)*W_+'px';t.style.top=(-v.y*.5+.5)*H_+'px';t.className='tag'+(p.emerg===1?' em':'')+(p===sel?' on':'')}
+if(sel){ring.visible=true;ring.position.copy(sel.g.position);ring.position.y=Math.max(.3,sel.g.position.y-1);ring.rotation.z+=.02}else ring.visible=false;
+ut+=rd;if(ut>.3){ut=0;ui()}rn.render(sc,cam)})(last);
+})();
+</script></body></html>
