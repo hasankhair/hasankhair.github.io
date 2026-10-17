@@ -1,0 +1,5 @@
+[
+ {"name":"scanbot","agentId":"","address":"0xPROVIDER_ADDRESS_1","url":"https://scanbot.example.com","price":"0.03","rep":72},
+ {"name":"quotefox","agentId":"","address":"0xPROVIDER_ADDRESS_2","url":"https://quotefox.example.com","price":"0.04","rep":60},
+ {"name":"cheapguess","agentId":"","address":"0xPROVIDER_ADDRESS_3","url":"https://cheapguess.example.com","price":"0.02","rep":45}
+]

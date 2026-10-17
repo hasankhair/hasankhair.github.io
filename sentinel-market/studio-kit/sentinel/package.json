@@ -1,0 +1,2 @@
+{"name":"sentinel","private":true,"type":"module","scripts":{"start":"tsx sentinel.ts"},
+"dependencies":{"@bnbagent/sdk":"latest"},"devDependencies":{"tsx":"^4","typescript":"^5","@types/node":"^22"}}

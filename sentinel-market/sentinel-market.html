@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SentinelMarket – BNB Agent Commerce Demo</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f6f5f0;--card:#fff;--fg:#1b1b18;--mut:#6c6c63;--bd:#e5e3d8;--ac:#c99a06;--acs:#fdf3cf;--ok:#18794e;--bad:#c2312d;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121211;--card:#1c1c1a;--fg:#f2f1ea;--mut:#9b9b91;--bd:#33332e;--ac:#f3ba2f;--acs:#3a3115;--ok:#4cc38a;--bad:#ff6b66;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121211;--card:#1c1c1a;--fg:#f2f1ea;--mut:#9b9b91;--bd:#33332e;--ac:#f3ba2f;--acs:#3a3115;--ok:#4cc38a;--bad:#ff6b66;color-scheme:dark}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:960px;margin:0 auto;padding:18px 16px 48px}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+h1{font-size:22px;margin:0}h2{font-size:12px;text-transform:uppercase;letter-spacing:.09em;color:var(--mut);margin:22px 0 10px}
+.sub{color:var(--mut);margin:2px 0 4px;max-width:70ch}
+.pill{font-size:12px;padding:3px 10px;border-radius:99px;background:var(--acs);color:var(--fg);display:inline-flex;gap:6px;align-items:center}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--ok);animation:pu 1.6s infinite}@keyframes pu{50%{opacity:.35}}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.stat .l{font-size:12px;color:var(--mut)}.stat .v{font-size:25px;font-weight:700;line-height:1.3}.stat .s{font-size:12px;color:var(--mut)}
+button,select{font:inherit;color:var(--fg);cursor:pointer}
+button:focus-visible,input:focus-visible,.agent:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.btn{padding:9px 15px;border-radius:10px;border:1px solid var(--bd);background:var(--card);transition:transform .15s,background .2s}
+.btn:hover:not(:disabled){transform:translateY(-1px);border-color:var(--ac)}.btn:active:not(:disabled){transform:scale(.97)}
+.btn.p{background:var(--ac);border-color:var(--ac);color:#17140a;font-weight:600}
+.btn.on{background:var(--acs);border-color:var(--ac)}
+button:disabled{opacity:.45;cursor:not-allowed}
+.tasks{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.task{text-align:left;padding:12px;border-radius:12px;border:2px solid var(--bd);background:var(--card);transition:all .2s}
+.task[aria-pressed=true]{border-color:var(--ac);background:var(--acs)}.task b{display:block}.task span{font-size:12px;color:var(--mut)}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.ctl{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--mut);flex:1;min-width:230px}.ctl input{flex:1;accent-color:var(--ac)}
+.pipe{position:relative;display:flex;justify-content:space-between;padding:20px 4px 10px}
+.pipe:before{content:'';position:absolute;left:10%;right:10%;top:36px;height:2px;background:var(--bd)}
+.node{position:relative;z-index:1;text-align:center;font-size:12px;color:var(--mut);width:20%}
+.node span{display:flex;margin:0 auto 4px;width:34px;height:34px;border-radius:50%;background:var(--card);border:2px solid var(--bd);align-items:center;justify-content:center;font-size:16px;transition:all .3s}
+.node.on{color:var(--fg);font-weight:600}.node.on span{border-color:var(--ac);transform:scale(1.2);box-shadow:0 0 0 6px var(--acs)}
+.node.done span{border-color:var(--ok)}
+#coin{position:absolute;top:29px;left:10%;width:14px;height:14px;border-radius:50%;background:var(--ac);z-index:2;transition:left .6s cubic-bezier(.5,0,.2,1);box-shadow:0 0 10px var(--ac)}
+#cap{text-align:center;font-size:13px;color:var(--mut);min-height:22px;border-top:1px dashed var(--bd);padding-top:8px}
+.agent{cursor:pointer;transition:transform .2s,box-shadow .3s,border-color .3s;position:relative}
+.agent:hover{transform:translateY(-3px);border-color:var(--ac)}.agent.sel{border-color:var(--ac);box-shadow:0 0 0 2px var(--ac)}
+.agent.win{animation:glow .9s}.agent.lose{animation:shake .5s}.agent.dis{pointer-events:none;opacity:.7}
+@keyframes glow{40%{box-shadow:0 0 0 7px var(--ok)}}@keyframes shake{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+.ah{display:flex;gap:10px;align-items:center}.av{font-size:26px;width:44px;height:44px;border-radius:12px;background:var(--acs);display:flex;align-items:center;justify-content:center}
+.ah small{color:var(--mut);display:block;font-size:12px}
+.tag{font-size:11px;padding:1px 8px;border-radius:99px;border:1px solid currentColor;margin-left:6px}
+.rep{height:7px;background:var(--bd);border-radius:4px;margin:10px 0 6px;overflow:hidden}.rep i{display:block;height:100%;background:var(--ac);transition:width .6s}
+.am{display:flex;justify-content:space-between;font-size:12px;color:var(--mut)}
+.best{position:absolute;top:-9px;right:12px;font-size:11px;background:var(--ac);color:#17140a;padding:1px 9px;border-radius:99px;font-weight:600}
+.tabs{display:flex;gap:6px;margin-bottom:8px}.tabs .btn{padding:4px 12px;font-size:13px}
+#log{max-height:320px;overflow-y:auto;font-size:13px}
+#log div{padding:6px 2px;border-bottom:1px dashed var(--bd);animation:sl .35s ease-out}@keyframes sl{from{opacity:0;transform:translateX(-14px)}}
+.empty{color:var(--mut);padding:18px;text-align:center}
+.mono{font-family:ui-monospace,Menlo,monospace;color:var(--mut)}
+.ok{color:var(--ok)}.bad{color:var(--bad)}.ac{color:var(--ac)}
+.float{position:fixed;font-weight:700;pointer-events:none;animation:fl 1.4s ease-out forwards;z-index:9}@keyframes fl{to{transform:translateY(-60px);opacity:0}}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,90px);background:var(--fg);color:var(--bg);padding:10px 18px;border-radius:12px;transition:transform .35s;z-index:10;font-size:14px;max-width:90vw}
+#toast.show{transform:translate(-50%,0)}
+details{margin-top:12px;color:var(--mut);font-size:14px}summary{cursor:pointer;color:var(--fg)}
+@media (max-width:520px){.node{font-size:10px}h1{font-size:19px}}
+#chatfab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));width:54px;height:54px;border-radius:50%;border:0;background:var(--ac);color:#17140a;font-size:24px;box-shadow:0 6px 20px rgba(0,0,0,.25);z-index:20;transition:transform .2s}#chatfab:hover{transform:scale(1.08)}
+#chat{position:fixed;right:16px;bottom:calc(80px + env(safe-area-inset-bottom,0px));width:min(380px,calc(100vw - 32px));height:min(520px,70vh);background:var(--card);border:1px solid var(--bd);border-radius:16px;display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(0,0,0,.28);z-index:20;overflow:hidden;animation:pop .25s ease-out}@keyframes pop{from{opacity:0;transform:translateY(14px) scale(.97)}}
+#chat[hidden],#chatfab[hidden]{display:none}
+#chead{padding:10px 14px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;font-weight:600}
+#cmsgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.m{max-width:88%;padding:8px 12px;border-radius:14px;white-space:pre-wrap;font-size:14px;animation:sl .25s}.m.u{align-self:flex-end;background:var(--ac);color:#17140a}.m.b{align-self:flex-start;background:var(--acs)}.m.t{align-self:center;font-size:12px;color:var(--mut);background:none;padding:0}
+#chips{display:flex;gap:6px;flex-wrap:wrap;padding:0 12px 8px}#chips button{font-size:12px;padding:4px 10px;border-radius:99px;border:1px solid var(--bd);background:var(--card)}
+#cform{display:flex;gap:6px;padding:10px;border-top:1px solid var(--bd)}#cin{flex:1;font:inherit;padding:8px 12px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--fg)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.pipe:before,.pipe:after{top:41px}
+.pipe:after{content:'';position:absolute;left:10%;height:2px;width:calc(var(--p,0)*80%);background:var(--ac);transition:width .7s}
+.node span{width:44px;height:44px;font-size:20px}
+#coin{top:34px;width:16px;height:16px}
+#cap{font-size:15px;font-weight:600;color:var(--fg)}
+.node small{display:block;font-size:10px;color:var(--ac);margin-top:2px}
+.node.okk span{background:var(--ok);border-color:var(--ok)}
+.node.nok span{background:var(--bad);border-color:var(--bad);animation:shake .5s}
+.pt{position:absolute;width:6px;height:6px;border-radius:50%;pointer-events:none;animation:pt .8s ease-out forwards;z-index:3}@keyframes pt{to{transform:translate(var(--dx),var(--dy));opacity:0}}
+.lb{display:flex;align-items:center;gap:8px;margin:7px 0;font-size:13px}.lb .rep{flex:1;margin:0}
+body.pres{font-size:19px}body.pres main{max-width:1320px}body.pres h1{font-size:34px}body.pres .stat .v{font-size:38px}
+body.pres .node{font-size:16px}body.pres .node span{width:64px;height:64px;font-size:28px}body.pres .node small{font-size:13px}
+body.pres .pipe:before,body.pres .pipe:after{top:51px}body.pres #coin{top:44px}body.pres #cap{font-size:22px}
+body.pres details,body.pres #live,body.pres h2:has(+#live){display:none}
+:root{--ac:#F0B90B;--acs:#FEF3C7;--bg:#FAFAFA;--fg:#1E2329;--bd:#EAECEF;--mut:#707A8A;--ok:#0A9A64;--bad:#D9304A}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0B0E11;--card:#181A20;--fg:#EAECEF;--bd:#2B3139;--mut:#848E9C;--acs:#2B2411;--ok:#2EBD85;--bad:#F6465D}}
+:root[data-theme="dark"]{--bg:#0B0E11;--card:#181A20;--fg:#EAECEF;--bd:#2B3139;--mut:#848E9C;--acs:#2B2411;--ok:#2EBD85;--bad:#F6465D}
+h1:before{content:'';display:inline-block;width:13px;height:13px;background:var(--ac);transform:rotate(45deg);margin-right:10px;vertical-align:middle}
+#req{flex:1;min-width:200px;font:inherit;padding:9px 12px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--fg)}
+.alertb{margin-top:10px;padding:12px;border-radius:10px;font-weight:600;animation:sl .4s;border:1px solid var(--bad);background:var(--acs)}
+.agent.ban{opacity:.45;filter:grayscale(1)}.agent.ban:after{content:'BLACKLISTED';position:absolute;top:8px;right:10px;font-size:11px;font-weight:700;color:var(--bad)}
+#narr{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top,0px));transform:translate(-50%,-30px);opacity:0;background:var(--fg);color:var(--bg);padding:14px 26px;border-radius:14px;font-size:22px;font-weight:600;max-width:min(900px,92vw);text-align:center;transition:all .4s;z-index:15;pointer-events:none}#narr.on{opacity:1;transform:translate(-50%,0)}
+.xp{overflow-x:auto}.xp table{width:100%;border-collapse:collapse;font-size:12px}.xp th,.xp td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--bd);white-space:nowrap}.xp th{color:var(--mut);font-weight:500}
+.xp tr.new{animation:sl .4s}.mth{background:var(--acs);padding:1px 8px;border-radius:6px;font-size:11px}.xh{color:var(--ac);font-family:ui-monospace,Menlo,monospace}
+body.pres #pitch{display:none}
+#hero{border:2px solid var(--ac);background:linear-gradient(135deg,var(--acs),var(--card));margin:14px 0}#hero .hk{font-size:24px;font-weight:800;line-height:1.2}#hero p{margin:6px 0 0;color:var(--mut)}body.pres #hero{display:none}
+.node span{position:relative}
+.node.on#n3 span:after,.node.on#n4 span:after{content:'';position:absolute;inset:-8px;border-radius:50%;border:2px dashed var(--ac)}
+.node.on#n3 span:after{animation:rot 1.2s linear infinite}.node.on#n4 span:after{border-style:solid;animation:ring 1s ease-out infinite}
+.node.on#n2 span{animation:lk .5s}
+@keyframes rot{to{transform:rotate(360deg)}}@keyframes ring{from{transform:scale(.8);opacity:1}to{transform:scale(1.5);opacity:0}}@keyframes lk{30%{transform:scale(1.5) rotate(-12deg)}60%{transform:scale(1.15) rotate(8deg)}}
+.tr{position:absolute;width:10px;height:10px;margin:3px;border-radius:50%;background:var(--ac);opacity:.5;animation:trf .5s forwards;z-index:1;pointer-events:none}@keyframes trf{to{opacity:0;transform:scale(.2)}}
+.sv-m{fill:var(--mut);font-weight:400;font-size:11px}
+#txm{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:30;padding:16px}#txm[hidden]{display:none}
+.txc{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;max-width:520px;width:100%;max-height:85vh;overflow:auto;animation:pop .25s}
+.txr{display:grid;grid-template-columns:120px 1fr;gap:8px;padding:6px 0;border-bottom:1px dashed var(--bd);font-size:13px;word-break:break-all}.txr span:first-child{color:var(--mut)}
+@media (max-width:560px){main{padding:12px 12px 90px}header{flex-wrap:wrap}.grid{grid-template-columns:1fr 1fr}#agents,.grid:has(#lb){grid-template-columns:1fr}.tasks{grid-template-columns:1fr}
+.node small{display:none}.node span{width:36px;height:36px;font-size:16px}.pipe:before,.pipe:after{top:37px}#coin{top:30px}#cap{font-size:13px}
+.bar .btn{flex:1 1 130px}.ctl{min-width:100%}#hero .hk{font-size:19px}.stat .v{font-size:21px}#narr{font-size:15px;padding:10px 14px}
+#chat{width:calc(100vw - 20px);right:10px;height:72vh}.txr{grid-template-columns:90px 1fr}}
+</style></head><body><main>
+<header><h1>🛡️ SentinelMarket</h1><div><span class="pill"><i class="dot"></i>Sentinel online</span> <button class="btn" id="theme" aria-label="Toggle theme" style="padding:4px 10px">🌓</button></div></header>
+<p class="sub">An autonomous BNB Chain agent economy. The Sentinel sells risk alerts, hires worker agents by on-chain reputation, escrows payment, verifies work and funds itself.</p>
+<details><summary>How it works</summary><ol><li>A subscriber pays the Sentinel for an alert.</li><li>The Sentinel picks a worker by ERC-8004-style reputation, or you pick one.</li><li>Payment is locked in escrow while the worker delivers.</li><li>A verifier scores the result: pass releases funds, fail refunds and cuts reputation.</li></ol>Simulated demo. Swap the mock steps for BNB Agent Studio and real contracts.</details>
+
+<h2>Treasury</h2>
+<div class="grid">
+<div class="card stat"><div class="l">💰 Treasury</div><div class="v" id="bal">0.500 BNB</div><div class="s" id="net">Net +0.000</div></div>
+<div class="card stat"><div class="l">🔒 In escrow</div><div class="v" id="esc">0.000 BNB</div><div class="s" id="escs">Idle</div></div>
+<div class="card stat"><div class="l">📋 Jobs</div><div class="v" id="jobs">0</div><div class="s" id="jstat">0 settled · 0 refunded</div></div>
+<div class="card stat"><div class="l">📈 Success rate</div><div class="v" id="rate">–</div><div class="s">Across all workers</div></div>
+</div>
+
+<h2>Live pipeline</h2>
+<div class="card"><div class="pipe"><div id="coin"></div>
+<div class="node" id="n0"><span>👤</span>Subscriber</div><div class="node" id="n1"><span>🛡️</span>Sentinel</div><div class="node" id="n2"><span>🔒</span>Escrow</div><div class="node" id="n3"><span>🤖</span>Worker</div><div class="node" id="n4"><span>✅</span>Verifier</div></div>
+<div id="cap" aria-live="polite">Pick a task, then hire the best agent or choose one below.</div></div>
+
+<h2>1 · Choose a task</h2>
+<div class="tasks" id="tasks"></div>
+
+<h2>2 · Workers <span style="text-transform:none;letter-spacing:0">(click a card to hire directly)</span></h2>
+<div class="grid" id="agents"></div>
+
+<div class="bar">
+<button class="btn p" id="run">⚡ Hire best agent</button>
+<button class="btn" id="auto" aria-pressed="false">▶ Auto-pilot</button>
+<button class="btn" id="spd" title="Animation speed">Speed 1×</button>
+<button class="btn" onclick="location.reload()">↺ Reset</button>
+<label class="ctl">Verifier <input type="range" id="strict" min="20" max="90" value="55" aria-label="Verifier strictness"><b id="sv" style="min-width:90px;color:var(--fg)">Balanced 55%</b></label>
+</div>
+
+<h2>On-chain event log</h2>
+<div class="card"><div class="tabs"><button class="btn on" data-f="all">All</button><button class="btn" data-f="pay">Payments</button><button class="btn" data-f="rep">Reputation</button></div><div id="log" aria-live="polite"></div></div>
+<h2>Go live on BNB Agent Studio</h2>
+<div class="card" id="live">
+<p style="margin-top:0">This page is a simulation. Each step maps to a real Studio / BNB Agent SDK primitive on <b>BSC testnet</b>:</p>
+<div class="am" style="display:block;line-height:1.9;font-size:13px">
+💳 Subscriber pays → <b>x402 / B402</b> face on the Sentinel<br>
+🪪 Worker identity &amp; reputation → <b>ERC-8004</b> registry<br>
+🔒 Escrow lock / refund / release → <b>ERC-8183</b> job (createJob → fund → settle)<br>
+🤖 Worker agents → built with <b>bag</b> + <code>/bnbagent-studio</code>, served over A2A / MCP<br>
+💸 Self-funding → <code>bag budget enable</code> (auto-refill)</div>
+<div class="bar"><button class="btn p" id="cp1">Copy install commands</button><button class="btn" id="cp2">Copy ScanBot prompt</button>
+<a class="btn" href="https://docs.bnbchain.org/developer-kit/bnbchain-studio/quickstart/" target="_blank" rel="noopener" style="text-decoration:none;color:var(--fg)">Studio quickstart ↗</a></div>
+<p class="am" style="display:block;margin:10px 0 0">The downloadable kit has the worker prompts and a TypeScript Sentinel buyer. Use throwaway testnet wallets only.</p></div>
+</main><div id="toast" role="status"></div>
+<button id="chatfab" hidden aria-label="Open assistant">💬</button>
+<div id="chat" hidden role="dialog" aria-label="Sentinel Assistant"><div id="chead"><span>🛡️ Sentinel Assistant</span><button class="btn" id="cx" aria-label="Close" style="padding:2px 10px">✕</button></div>
+<div id="cmsgs" aria-live="polite"></div><div id="chips"></div>
+<form id="cform" onsubmit="return false"><input id="cin" placeholder="Ask or tell me to act…" autocomplete="off" aria-label="Message"><button class="btn p" id="csend">Send</button></form></div>
+<script>
+const $=id=>document.getElementById(id),Q=s=>document.querySelectorAll(s);
+let mult=1;const sleep=ms=>new Promise(r=>setTimeout(r,ms/mult));
+const hash=()=>'0x'+[...Array(8)].map(()=>(Math.random()*16|0).toString(16)).join('')+'…';
+const S={bal:.5,earned:0,spent:0,esc:0,ok:0,ref:0,busy:false,auto:false};
+const A=[{id:'#8004-001',name:'ScanBot',av:'🔍',rep:72,price:.03,skill:.85,w:0,l:0},
+{id:'#8004-002',name:'QuoteFox',av:'🦊',rep:60,price:.04,skill:.7,w:0,l:0},
+{id:'#8004-003',name:'CheapGuess',av:'🎲',rep:45,price:.02,skill:.4,w:0,l:0}];
+const T=[{n:'Rug-pull scan',i:'🕵️',fee:.03,d:'Audit token 0x9f…c21'},{n:'LP rebalance quote',i:'⚖️',fee:.04,d:'PancakeSwap v3 position'},{n:'Whale digest',i:'🐋',fee:.025,d:'Large wallet movements'}];
+let task=0,sel=null,filter='all';const shown={};
+const tier=r=>r>=70?['Trusted','ok']:r>=50?['Rising','ac']:['Risky','bad'];
+function tween(id,v){const el=$(id),f=shown[id]??v,t0=performance.now();shown[id]=v;(function g(t){const k=Math.min(1,(t-t0)/450);el.textContent=(f+(v-f)*k).toFixed(3)+' BNB';if(k<1)requestAnimationFrame(g)})(t0)}
+function best(){return A.filter(a=>a.price<=S.bal).sort((x,y)=>y.rep-x.rep)[0]}
+function render(){
+ tween('bal',S.bal);tween('esc',S.esc);
+ const n=S.earned-S.spent;$('net').textContent=`Net ${n>=0?'+':''}${n.toFixed(3)} · earned ${S.earned.toFixed(3)}`;
+ $('escs').textContent=S.esc?'Funds locked':'Idle';$('jobs').textContent=S.ok+S.ref;
+ $('jstat').textContent=`${S.ok} settled · ${S.ref} refunded`;$('rate').textContent=S.ok+S.ref?Math.round(S.ok/(S.ok+S.ref)*100)+'%':'–';
+ if(!$('agents').children.length)$('agents').innerHTML=A.map((a,i)=>`<div class="card agent" id="ag${i}" tabindex="0" role="button" onclick="hire(${i})" onkeydown="if(event.key==='Enter')hire(${i})"><span class="best" hidden>★ Recommended</span><div class="ah"><div class="av">${a.av}</div><div><b>${a.name}<span class="tag"></span></b><small>${a.id}</small></div></div><div class="rep"><i></i></div><div class="am"><span></span><span></span></div></div>`).join('');
+ const b=best();
+ A.forEach((a,i)=>{const e=$('ag'+i),t=tier(a.rep),tg=e.querySelector('.tag');tg.textContent=t[0];tg.className='tag '+t[1];
+ e.querySelector('i').style.width=a.rep+'%';const m=e.querySelectorAll('.am span');m[0].textContent=`Rep ${a.rep}/100 · ${a.w}W/${a.l}L`;m[1].textContent=`${a.price.toFixed(3)} BNB`;
+ e.classList.toggle('sel',a===sel);e.classList.toggle('dis',S.busy);e.querySelector('.best').hidden=a!==b})
+}
+function log(t,c='',k='pay'){const d=document.createElement('div');d.dataset.k=k;d.innerHTML=`<span class="mono">${new Date().toLocaleTimeString()}</span> <span class="${c}">${t}</span>`;
+ d.hidden=filter!=='all'&&filter!==k;const e=$('log').querySelector('.empty');if(e)e.remove();$('log').prepend(d)}
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('show'),2600)}
+function step(i,cap){Q('.node').forEach((n,j)=>{n.classList.toggle('on',j===i);n.classList.toggle('done',j<i)});const n=$('n'+i);$('coin').style.left=(n.offsetLeft+n.offsetWidth/2-7)+'px';if(cap)$('cap').textContent=cap}
+function fl(txt,cls){const r=$('bal').getBoundingClientRect(),d=document.createElement('div');d.className='float '+cls;d.textContent=txt;d.style.left=r.left+'px';d.style.top=r.top+'px';document.body.appendChild(d);setTimeout(()=>d.remove(),1400)}
+function hire(i){if(!S.busy)job(A[i])}
+async function job(forced){
+ if(S.busy)return;S.busy=true;$('run').disabled=true;const tk=T[task],fee=tk.fee;render();
+ step(0,`Subscriber pays for "${tk.n}"…`);const inc=fee*1.4;S.bal+=inc;S.earned+=inc;render();fl('+'+inc.toFixed(3),'ok');
+ log(`💳 Subscriber paid ${inc.toFixed(3)} BNB for ${tk.n} · ${hash()}`,'ac');await sleep(900);
+ const pick=forced||best();step(1,'Sentinel is choosing a worker…');
+ if(!pick||pick.price>S.bal){log('⚠️ Treasury too low to hire','bad','sys');toast('Treasury too low to hire an agent');S.busy=false;$('run').disabled=false;render();return}
+ sel=pick;render();log(`🛡️ Sentinel selected <b>${pick.name}</b> ${pick.id}`,'',"rep");await sleep(900);
+ step(2,`Locking ${pick.price.toFixed(3)} BNB in escrow…`);S.bal-=pick.price;S.esc=pick.price;render();fl('−'+pick.price.toFixed(3),'bad');
+ log(`🔒 Escrow locked ${pick.price.toFixed(3)} BNB · ${hash()}`,'ac');await sleep(1000);
+ step(3,`${pick.name} is working…`);await sleep(1200);
+ const q=Math.random()<pick.skill?.6+Math.random()*.4:Math.random()*.6;log(`📦 ${pick.name} delivered result ${hash()}`,'','sys');await sleep(500);
+ step(4,'Verifier is scoring the deliverable…');const need=$('strict').value/100;await sleep(900);
+ const e=$('ag'+A.indexOf(pick));
+ if(q>=need){S.esc=0;S.spent+=pick.price;S.ok++;pick.w++;pick.rep=Math.min(100,pick.rep+3);e.classList.add('win');
+  $('cap').textContent=`Approved: quality ${q*100|0}%. Payment released.`;toast(`✔ ${pick.name} paid ${pick.price.toFixed(3)} BNB`);
+  log(`✔ Quality ${q*100|0}% ≥ ${need*100|0}%. Escrow released · ${hash()}`,'ok');log(`⭐ ${pick.name} reputation +3`,'ok','rep')}
+ else{S.esc=0;S.bal+=pick.price;S.ref++;pick.l++;pick.rep=Math.max(0,pick.rep-8);e.classList.add('lose');
+  $('cap').textContent=`Rejected: quality ${q*100|0}% is below ${need*100|0}%. Refunded.`;toast(`✖ ${pick.name} failed verification`);
+  log(`✖ Quality ${q*100|0}% < ${need*100|0}%. Escrow refunded · ${hash()}`,'bad');log(`⚠️ ${pick.name} reputation −8`,'bad','rep')}
+ setTimeout(()=>e.classList.remove('win','lose'),1000);render();await sleep(700);
+ Q('.node').forEach(n=>n.classList.remove('on','done'));sel=null;S.busy=false;$('run').disabled=false;render();
+}
+$('tasks').innerHTML=T.map((t,i)=>`<button class="task" data-i="${i}" aria-pressed="${i===0}"><b>${t.i} ${t.n}</b><span>${t.d} · ${t.fee.toFixed(3)} BNB</span></button>`).join('');
+Q('.task').forEach(b=>b.onclick=()=>{task=+b.dataset.i;Q('.task').forEach(x=>x.setAttribute('aria-pressed',x===b))});
+Q('.tabs .btn').forEach(b=>b.onclick=()=>{filter=b.dataset.f;Q('.tabs .btn').forEach(x=>x.classList.toggle('on',x===b));Q('#log div').forEach(d=>d.hidden=filter!=='all'&&d.dataset.k!==filter&&!d.classList.contains('empty'))});
+$('run').onclick=()=>job();
+$('auto').onclick=async()=>{S.auto=!S.auto;$('auto').classList.toggle('on',S.auto);$('auto').setAttribute('aria-pressed',S.auto);$('auto').textContent=S.auto?'⏸ Stop auto-pilot':'▶ Auto-pilot';
+ while(S.auto){await job();await sleep(1200)}};
+$('spd').onclick=()=>{mult=mult===1?2:mult===2?4:1;$('spd').textContent='Speed '+mult+'×'};
+$('strict').oninput=e=>{const v=+e.target.value;$('sv').textContent=(v<40?'Lenient ':v<70?'Balanced ':'Strict ')+v+'%'};
+$('theme').onclick=()=>{const r=document.documentElement,d=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme:dark)').matches;r.dataset.theme=d?'light':'dark'};
+(async()=>{
+ const sample=window.claude?await claude.use('sample').catch(()=>null):null;
+ if(!sample)return;
+ const fab=$('chatfab'),box=$('chat'),msgs=$('cmsgs'),inp=$('cin');let hist=[],pending=false;fab.hidden=false;
+ const add=(c,t)=>{const d=document.createElement('div');d.className='m '+c;d.textContent=t;msgs.appendChild(d);msgs.scrollTop=1e9;return d};
+ const ctx=()=>`You are Sentinel Assistant inside SentinelMarket, a browser demo of an autonomous agent economy on BNB Chain. The Sentinel agent sells risk alerts to subscribers, hires worker agents by reputation, locks payment in escrow (ERC-8183 in the real version), a verifier scores the deliverable, then funds are released or refunded and the worker's reputation (ERC-8004 identity) changes. The page is a simulation: random outcomes weighted by worker skill, no real money. The separate downloadable kit connects it to BNB Agent Studio (bag CLI, /bnbagent-studio skill, BSC testnet only, throwaway wallets). Workers: ScanBot (reliable), QuoteFox (decent), CheapGuess (cheap, often fails). Verifier strictness is the minimum quality needed to pass.\nLIVE STATE: treasury ${S.bal.toFixed(3)} BNB, escrow ${S.esc.toFixed(3)}, earned ${S.earned.toFixed(3)}, spent ${S.spent.toFixed(3)}, jobs ${S.ok} settled/${S.ref} refunded, busy=${S.busy}, task=${T[task].n}, strictness=${$('strict').value}%. Workers: ${A.map(a=>`${a.name} rep ${a.rep} ${a.w}W/${a.l}L price ${a.price}`).join('; ')}. Job history: ${typeof HIST!=='undefined'?JSON.stringify(HIST.slice(-5)):'[]'}. Recent log: ${[...$('log').children].slice(0,6).map(d=>d.textContent).join(' | ')}.\nBe concise (under 110 words), plain text, no markdown. Use tools when the user asks you to act. Never invent real on-chain data. JUDGE FAQ: Business model: the Sentinel earns about a 40% margin on each alert and funds itself (bag budget enable auto-refills the LLM wallet). Trust: ERC-8004 identity and reputation, ERC-8183 escrow, and the buyer decides approve or reject, so nothing auto-settles. Security: signing is fixed code never exposed to an LLM; testnet and throwaway wallets only. Real vs simulated: this page is simulated; the downloadable kit deploys real seller agents with BNB Agent Studio and runs a TypeScript buyer on BSC testnet. Known gaps: the reject/dispute call and seller RPC shapes still need wiring, and reputation is a local file. Why agents: autonomous commerce with no middleman. Stack: Studio CLI, BNB Agent SDK, A2A/MCP/x402, AWS AgentCore or the BNB managed trial.`;
+ const tools=[
+ {name:'hire_agent',description:'Hire a worker (scanbot, quotefox or cheapguess) to run the currently selected task.',inputSchema:{type:'object',properties:{name:{type:'string'}},required:['name']},execute:async({name})=>{const i=A.findIndex(a=>a.name.toLowerCase()===String(name).toLowerCase());if(i<0)throw new Error('unknown worker');if(S.busy)throw new Error('a job is already running');hire(i);return `Started job with ${A[i].name}; it finishes in about 7 seconds and shows in the log.`}},
+ {name:'select_task',description:'Select the task: 0 rug-pull scan, 1 LP rebalance quote, 2 whale digest.',inputSchema:{type:'object',properties:{index:{type:'integer'}},required:['index']},execute:async({index})=>{if(S.busy)throw new Error('job running');if(!T[index])throw new Error('bad index');Q('.task')[index].click();return 'Selected '+T[index].n}},
+ {name:'start_demo',description:'Start the 60-second narrated auto-demo.',inputSchema:{type:'object',properties:{}},execute:async()=>{if(S.busy)throw new Error('job running');demo();return 'Demo started'}},
+ {name:'rug_pull_scenario',description:'Run the rug-pull-caught scenario with ScanBot.',inputSchema:{type:'object',properties:{}},execute:async()=>{if(S.busy)throw new Error('job running');scRug();return 'Scenario started'}},
+ {name:'run_jobs',description:'Run several jobs in a row (max 5) with the best available agent.',inputSchema:{type:'object',properties:{count:{type:'integer'}},required:['count']},execute:async({count})=>{const n=Math.max(1,Math.min(5,count|0));if(S.busy)throw new Error('a job is already running');(async()=>{for(let i=0;i<n;i++){while(S.busy)await sleep(300);await job()}})();return 'Running '+n+' jobs with the best agent; watch the pipeline.'}},
+ {name:'get_history',description:'Get the most recent job results (worker, quality, pass/fail).',inputSchema:{type:'object',properties:{}},execute:async()=>JSON.stringify(HIST.slice(-8))},
+ {name:'set_strictness',description:'Set verifier strictness percent between 20 and 90.',inputSchema:{type:'object',properties:{value:{type:'number'}},required:['value']},execute:async({value})=>{const v=Math.max(20,Math.min(90,Math.round(value)));$('strict').value=v;$('strict').dispatchEvent(new Event('input'));return 'Strictness is now '+v+'%'}}];
+ async function send(text){
+  if(pending||!text.trim())return;pending=true;$('csend').disabled=true;inp.value='';$('chips').hidden=true;add('u',text);
+  const b=add('b','…'),ac=new AbortController();
+  try{
+   const r=await sample([...hist,{role:'user',content:`[APP CONTEXT]\n${ctx()}\n\n[USER]\n${text}`}],{cache:false,tools,signal:ac.signal,onText:({text:t})=>{b.textContent=t||'…';msgs.scrollTop=1e9}});
+   b.textContent=r.text||'Done.';hist.push({role:'user',content:text},{role:'assistant',content:b.textContent});hist=hist.slice(-10);
+  }catch(e){b.textContent=e&&e.code==='rate_limited'?'Slow down a little and try again.':e&&e.code==='not_granted'?'Assistant permission was declined.':'Sorry, something went wrong. Try again.'}
+  pending=false;$('csend').disabled=false;inp.focus();
+ }
+ add('t','Ask me how it works, or tell me to hire an agent.');window.__sample=sample;window.__chatAdd=add;
+ $('chips').innerHTML=['Pitch it in 30 seconds','What is real vs simulated?','How does it make money?','Hire the best agent','Start the demo'].map(t=>`<button>${t}</button>`).join('');
+ Q('#chips button').forEach(b=>b.onclick=()=>send(b.textContent));
+ fab.onclick=()=>{box.hidden=!box.hidden;if(!box.hidden)inp.focus()};$('cx').onclick=()=>box.hidden=true;
+ $('cform').onsubmit=e=>{e.preventDefault();send(inp.value);return false};$('csend').onclick=e=>{e.preventDefault();send(inp.value)};
+})();
+const cp=(id,txt)=>$(id).onclick=async()=>{try{await navigator.clipboard.writeText(txt);toast('Copied to clipboard')}catch(e){toast('Copy blocked: select the text manually')}};
+cp('cp1','npm install --global @bnbagent/studio-cli\nbag skills install');
+cp('cp2','/bnbagent-studio Create a BNB Chain seller agent named scanbot that sells rug-pull risk scans for BEP-20 tokens (0-100 risk score with cited on-chain evidence). Start on bsc-testnet, use ERC-8183, expose A2A and MCP, default wallet and LLM, store deliverables on IPFS. Price 0.03 per job.');
+$('log').innerHTML='<div class="empty">No events yet. Hire an agent to start.</div>';
+// ---- v3: pipeline, presentation mode, performance ----
+function burst(i,color){const p=document.querySelector('.pipe'),n=$('n'+i),H=n.firstElementChild.offsetHeight;
+ for(let k=0;k<10;k++){const d=document.createElement('i'),a=k/10*6.283;d.className='pt';d.style.cssText=`left:${n.offsetLeft+n.offsetWidth/2-3}px;top:${20+H/2-3}px;background:${color};--dx:${Math.cos(a)*36}px;--dy:${Math.sin(a)*36}px`;p.appendChild(d);setTimeout(()=>d.remove(),850)}}
+function step(i,cap){const ns=[...Q('.node')];if(i===0)ns.forEach(n=>n.classList.remove('okk','nok'));
+ ns.forEach((n,j)=>{n.classList.toggle('on',j===i);n.classList.toggle('done',j<i)});
+ const n=$('n'+i);$('coin').style.left=(n.offsetLeft+n.offsetWidth/2-8)+'px';
+ document.querySelector('.pipe').style.setProperty('--p',i/4);if(cap)$('cap').textContent=cap;setTimeout(()=>burst(i,'var(--ac)'),550)}
+['x402','ERC-8004','ERC-8183','A2A · MCP','Verifier'].forEach((t,i)=>$('n'+i).insertAdjacentHTML('beforeend',`<small>${t}</small>`));
+const HIST=[],TS=[.5];
+const pw=document.createElement('div');
+pw.innerHTML=`<h2>Performance</h2><div class="grid"><div class="card"><div class="stat"><div class="l">🏆 Leaderboard</div></div><div id="lb"></div></div><div class="card"><div class="stat"><div class="l">📈 Treasury over time</div></div><svg id="spark" viewBox="0 0 200 60" style="width:100%;height:80px"></svg><div class="mut" id="sparkt"></div></div><div class="card"><div class="stat"><div class="l">🧾 Recent jobs</div></div><div id="hist" class="mut">No jobs yet</div></div></div>`;
+[...Q('h2')].find(h=>h.textContent.startsWith('On-chain')).before(pw);
+function perf(){
+ $('lb').innerHTML=[...A].sort((a,b)=>b.rep-a.rep).map((a,i)=>`<div class="lb"><span>${['🥇','🥈','🥉'][i]||''}</span><b style="width:84px">${a.name}</b><div class="rep"><i style="width:${a.rep}%"></i></div><span class="mut">${a.rep} · ${(a.w*a.price).toFixed(2)} BNB</span></div>`).join('');
+ const mn=Math.min(...TS),mx=Math.max(...TS),r=(mx-mn)||1;
+ $('spark').innerHTML=`<polyline fill='none' stroke='var(--ac)' stroke-width='2' points='${TS.map((v,i)=>`${TS.length>1?i/(TS.length-1)*196+2:2},${56-(v-mn)/r*50}`).join(' ')}'/>`;
+ $('sparkt').textContent=`Start 0.500 → now ${TS[TS.length-1].toFixed(3)} BNB`;
+ $('hist').innerHTML=HIST.length?HIST.slice(-6).reverse().map(h=>`<div class="${h.ok?'ok':'bad'}">${h.ok?'✔':'✖'} ${h.worker} · ${h.q}% · <span class="mono">${h.tx}</span></div>`).join(''):'No jobs yet';
+}
+new MutationObserver(()=>{const m=$('cap').textContent.match(/^(Approved|Rejected)[^0-9]*(\d+)%/);if(!m)return;const ok=m[1]==='Approved';
+ HIST.push({task:T[task].n,worker:sel?sel.name:'?',q:+m[2],ok,tx:hash()});TS.push(+(S.bal+S.esc).toFixed(3));
+ $('n4').classList.add(ok?'okk':'nok');burst(4,ok?'var(--ok)':'var(--bad)');perf()}).observe($('cap'),{childList:true,characterData:true,subtree:true});
+const pb=document.createElement('button');pb.className='btn';pb.textContent='🖥 Presentation';pb.title='Big-screen mode (P)';
+pb.onclick=()=>document.body.classList.toggle('pres');document.querySelector('.bar').appendChild(pb);
+addEventListener('keydown',e=>{if(e.key.toLowerCase()==='p'&&!/INPUT|TEXTAREA/.test(document.activeElement.tagName))pb.click()});
+// ---- v4: pitch tools, explorer, sound, demo ----
+const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+function best(){return A.filter(a=>!a.banned&&a.price<=S.bal).sort((x,y)=>y.rep-x.rep)[0]}
+function hire(i){if(S.busy)return;if(A[i].banned){toast(A[i].name+' is blacklisted');return}job(A[i])}
+document.querySelector('.pill').insertAdjacentHTML('afterend',' <span class="pill" style="background:var(--ac);color:#17140a;font-weight:600">BSC Testnet</span>');
+let snd=true,ac;
+function tone(f,d,t=0,ty='sine',v=.08){if(!snd)return;try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain(),n=ac.currentTime+t;o.type=ty;o.frequency.value=f;g.gain.setValueAtTime(v,n);g.gain.exponentialRampToValueAtTime(.0001,n+d);o.connect(g).connect(ac.destination);o.start(n);o.stop(n+d)}catch(e){}}
+const sfx={pay(){tone(660,.15);tone(880,.2,.12);tone(1320,.3,.24)},bad(){tone(180,.4,0,'sawtooth',.06);tone(120,.5,.15,'sawtooth',.06)},tick(){tone(520,.06,0,'square',.03)}};
+new MutationObserver(()=>{const t=$('cap').textContent;t.startsWith('Approved')?sfx.pay():t.startsWith('Rejected')?sfx.bad():sfx.tick()}).observe($('cap'),{childList:true,characterData:true,subtree:true});
+const tl=document.createElement('div');
+tl.innerHTML=`<div class="card" id="pitch" style="margin-top:14px"><div class="stat"><div class="l">🎤 Pitch tools</div></div><div class="bar" style="margin-top:8px"><input id="req" placeholder="Audience: paste a token address or ask for a scan…" aria-label="Audience request"><button class="btn p" id="sreq">Send request</button></div><div class="bar" style="margin-top:0"><button class="btn" id="sc1">🚨 Rug pull caught</button><button class="btn" id="sc2">⛔ Blacklist bad worker</button><button class="btn p" id="demo">🎬 60s auto-demo</button><button class="btn" id="snd">🔊 Sound on</button></div><div id="alert"></div></div>`;
+document.querySelector('.bar').after(tl.firstChild);
+$('snd').onclick=()=>{snd=!snd;$('snd').textContent=snd?'🔊 Sound on':'🔇 Sound off'};
+$('sreq').onclick=()=>{if(S.busy){toast('A job is already running');return}const t=$('req').value.trim()||'Rug-pull scan on 0x9f…c21',i=/whale/i.test(t)?2:/lp|rebalance|quote/i.test(t)?1:0;Q('.task')[i].click();log(`📨 Audience request: "${esc(t)}" → ${T[i].n}`,'ac','sys');$('req').value='';job()};
+const setStrict=v=>{$('strict').value=v;$('strict').dispatchEvent(new Event('input'))};
+async function scRug(){if(S.busy)return;const o=[A[0].skill,$('strict').value];A[0].skill=1;setStrict(35);Q('.task')[0].click();
+ log('🚨 Scenario: suspicious token 0x9f…c21 flagged by subscribers','bad','sys');await job(A[0]);
+ const ok=HIST.length&&HIST[HIST.length-1].ok;$('alert').innerHTML=ok?`<div class="alertb">🚨 RUG PULL CAUGHT: 0x9f…c21 scored 94/100 risk. Alert delivered before subscribers touched the pool.</div>`:'';A[0].skill=o[0];setStrict(o[1])}
+async function scBlack(){if(S.busy||A[2].banned)return;const o=$('strict').value;A[2].skill=0;setStrict(70);Q('.task')[2].click();
+ log('⛔ Scenario: CheapGuess takes a job','bad','sys');await job(A[2]);A[2].banned=true;A[2].rep=Math.max(0,A[2].rep-15);$('ag2').classList.add('ban');render();perf();setStrict(o);
+ log('⛔ CheapGuess blacklisted by the Sentinel (ERC-8004 reputation slashed)','bad','rep');$('alert').innerHTML=`<div class="alertb">⛔ CheapGuess blacklisted after failed verification. The Sentinel will never hire it again.</div>`}
+$('sc1').onclick=scRug;$('sc2').onclick=scBlack;
+let dstop=false;const nr=document.createElement('div');nr.id='narr';document.body.appendChild(nr);
+const narr=t=>{nr.textContent=t;nr.classList.toggle('on',!!t)};
+const wait=async ms=>{const t0=Date.now();while(Date.now()-t0<ms){if(dstop)throw 0;await new Promise(r=>setTimeout(r,100))}};
+async function demo(){const b=$('demo');if(b.dataset.run){dstop=true;return}if(S.busy)return;
+ b.dataset.run=1;b.textContent='■ Stop demo';dstop=false;const m0=mult;mult=1;document.body.classList.add('pres');scrollTo({top:0,behavior:'smooth'});
+ try{
+  narr('Meet the Sentinel: an autonomous agent that sells crypto risk alerts.');await wait(4500);
+  Q('.task')[0].click();let p=job();narr('A subscriber pays via x402. The Sentinel hires the best worker by reputation.');await wait(2400);
+  narr('The fee is locked in ERC-8183 escrow while the worker delivers.');await wait(2400);narr('A verifier scores the result before any money moves.');await p;await wait(1000);
+  narr('Now a scam token appears. Subscribers ask for a scan…');p=scRug();await wait(3500);narr('Scan, escrow, verify…');await p;narr('Rug pull caught before anyone lost money.');await wait(3000);
+  narr('A weak worker slips in…');p=scBlack();await wait(2500);narr('Verification fails. Funds refunded.');await p;narr('Reputation slashed. Blacklisted for good.');await wait(3000);
+  narr('Every alert earns a margin, so the Sentinel funds itself.');pw.scrollIntoView({behavior:'smooth',block:'center'});await wait(4500);
+  document.querySelector('.pipe').scrollIntoView({behavior:'smooth',block:'center'});Q('.task')[1].click();p=job();narr('Reputation decides who gets hired next.');await p;await wait(1200);
+  narr('Built for BNB Agent Studio: ERC-8004 identity, ERC-8183 escrow, x402 payments.');await wait(5000);
+ }catch(e){}finally{narr('');mult=m0;delete b.dataset.run;b.textContent='🎬 60s auto-demo'}}
+$('demo').onclick=demo;
+const ADDR={sub:'0x7a3f…91c2',sen:'0x51e0…c0de',esc:'0xE5c8…8183',reg:'0x8004…A11c',scanbot:'0x5ca2…b07a',quotefox:'0xf0a1…7c33',cheapguess:'0xc4e9…0b0b'};
+const TX=[];let blk=48120311;
+const xw=document.createElement('div');
+xw.innerHTML=`<h2>BSC Testnet explorer <span style="text-transform:none;letter-spacing:0">(simulated, chain 97)</span></h2><div class="card"><div class="mut" id="xb" style="margin-bottom:6px"></div><div class="xp"><table><thead><tr><th>Txn hash</th><th>Method</th><th>Block</th><th>Age</th><th>From</th><th>To</th><th>Value</th></tr></thead><tbody id="xt"><tr><td colspan="7" class="mut">No transactions yet</td></tr></tbody></table></div></div>`;
+[...Q('h2')].find(h=>h.textContent.startsWith('On-chain')).before(xw);
+function ago(s){return s<5?'just now':s<60?s+'s ago':Math.floor(s/60)+'m ago'}
+function xr(){if(!TX.length)return;$('xb').textContent='Latest block #'+blk.toLocaleString()+' · '+TX.length+' txns';
+ $('xt').innerHTML=TX.slice(-10).reverse().map((x,i)=>`<tr class="${i?'':'new'}"><td class="xh">${x.h}</td><td><span class="mth">${x.m}</span></td><td>${x.b.toLocaleString()}</td><td>${ago((Date.now()-x.t)/1000|0)}</td><td class="mono">${x.f}</td><td class="mono">${x.to}</td><td>${x.v} BNB</td></tr>`).join('')}
+function addTx(t){const w=A.find(a=>t.includes(a.name))||sel||A[0],wa=ADDR[w.name.toLowerCase()],h=(t.match(/0x[0-9a-f]{8}…/)||[hash()])[0],v=(t.match(/([0-9.]+) BNB/)||[])[1]||'0';let r=null;
+ if(t.includes('Subscriber paid'))r=['transfer (x402)',ADDR.sub,ADDR.sen,v];
+ else if(t.includes('Escrow locked'))r=['createJob + fund',ADDR.sen,ADDR.esc,v];
+ else if(t.includes('delivered result'))r=['submit',wa,ADDR.esc,'0'];
+ else if(t.includes('Escrow released'))r=['settle',ADDR.esc,wa,w.price.toFixed(3)];
+ else if(t.includes('Escrow refunded'))r=['reject + refund',ADDR.esc,ADDR.sen,w.price.toFixed(3)];
+ else if(t.includes('reputation'))r=['giveFeedback',ADDR.sen,ADDR.reg,'0'];
+ if(!r)return;blk+=1+(Math.random()*3|0);TX.push({h,m:r[0],b:blk,t:Date.now(),f:r[1],to:r[2],v:r[3]});xr()}
+const _log=log;log=function(t,c,k){try{addTx(t)}catch(e){}return _log(t,c,k)};
+// ---- v5: hero, architecture, share, tx details, pipeline, 90s demo, narration ----
+function trail(){let k=0;const p=document.querySelector('.pipe'),c=$('coin'),iv=setInterval(()=>{const d=document.createElement('i');d.className='tr';d.style.left=c.offsetLeft+'px';d.style.top=c.offsetTop+'px';p.appendChild(d);setTimeout(()=>d.remove(),500);if(++k>10)clearInterval(iv)},60)}
+function step(i,cap){const ns=[...Q('.node')];if(i===0)ns.forEach(n=>n.classList.remove('okk','nok'));
+ ns.forEach((n,j)=>{n.classList.toggle('on',j===i);n.classList.toggle('done',j<i)});
+ const n=$('n'+i);$('coin').style.left=(n.offsetLeft+n.offsetWidth/2-8)+'px';
+ document.querySelector('.pipe').style.setProperty('--p',i/4);if(cap)$('cap').textContent=cap;setTimeout(()=>burst(i,'var(--ac)'),550);trail()}
+const hero=document.createElement('div');hero.className='card';hero.id='hero';
+hero.innerHTML=`<div class="hk">Agents that hire, pay and judge other agents.</div><p>An autonomous risk-alert business on BNB Chain: ERC-8004 identity, ERC-8183 escrow, x402 payments.</p><div class="bar"><button class="btn p" id="hgo">▶ Start 90s demo</button><button class="btn" id="hlive">Try it live ↓</button></div>`;
+document.querySelector('.sub').after(hero);$('hgo').onclick=()=>demo();$('hlive').onclick=()=>$('tasks').scrollIntoView({behavior:'smooth'});
+const SU='https://claude.ai/artifact/GutWQPbUVs8mgX5wopNyk7';
+const ar=document.createElement('div');ar.id='arch';
+ar.innerHTML=`<h2>How it's built</h2><div class="card xp"><svg viewBox="0 0 720 250" style="min-width:580px;width:100%" role="img" aria-label="Architecture diagram"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" style="fill:var(--mut)"/></marker></defs><g style="font:600 13px system-ui;fill:var(--fg)" text-anchor="middle">
+<rect x="10" y="65" width="120" height="60" rx="12" style="fill:var(--card);stroke:var(--bd)"/><text x="70" y="92">👤 Subscriber</text><text x="70" y="110" class="sv-m">pays per alert</text>
+<rect x="215" y="50" width="160" height="90" rx="12" style="fill:var(--acs);stroke:var(--ac);stroke-width:2"/><text x="295" y="78">🛡️ Sentinel agent</text><text x="295" y="97" class="sv-m">buyer · verifier · treasury</text><text x="295" y="114" class="sv-m">A2A · MCP · bag runtime</text>
+<rect x="540" y="40" width="170" height="110" rx="12" style="fill:var(--card);stroke:var(--bd)"/><text x="625" y="70">🤖 Worker agents</text><text x="625" y="89" class="sv-m">ScanBot · QuoteFox</text><text x="625" y="105" class="sv-m">CheapGuess</text><text x="625" y="126" class="sv-m">Studio seller agents</text>
+<line x1="130" y1="95" x2="213" y2="95" style="stroke:var(--mut);stroke-width:2;marker-end:url(#ah)"/><text x="172" y="85" class="sv-m">x402</text>
+<line x1="375" y1="95" x2="538" y2="95" style="stroke:var(--mut);stroke-width:2;marker-end:url(#ah)"/><text x="456" y="82" class="sv-m">ERC-8183 job</text><text x="456" y="118" class="sv-m">🔒 fund · submit · settle</text>
+<rect x="215" y="170" width="340" height="38" rx="10" style="fill:var(--card);stroke:var(--ac);stroke-dasharray:5 4"/><text x="385" y="194">🪪 ERC-8004 identity + reputation registry</text>
+<path d="M295 140V170M625 150V189H557" style="fill:none;stroke:var(--mut);stroke-dasharray:4 4;stroke-width:1.5"/>
+<rect x="10" y="222" width="700" height="24" rx="8" style="fill:var(--acs)"/><text x="360" y="238" class="sv-m" style="fill:var(--fg)">BSC testnet (chain 97) · built with BNB Agent Studio · deploy: AWS AgentCore or BNB managed trial</text></g></svg></div>
+<h2>Share with judges</h2><div class="card" id="share" style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><div id="qr" style="background:#fff;padding:8px;border-radius:10px"></div><div style="flex:1;min-width:220px"><b>SentinelMarket</b><div class="mut">Autonomous agent commerce on BNB Chain: ERC-8004 · ERC-8183 · x402 · built with BNB Agent Studio.</div><div class="mono" style="margin:8px 0;word-break:break-all">${SU}</div><button class="btn p" id="cplink">Copy link</button><div class="mut" style="font-size:12px;margin-top:6px">Share the artifact first so judges can open it.</div></div></div>`;
+[...Q('h2')].find(h=>h.textContent.startsWith('Go live')).before(ar);
+const qs=document.createElement('script');qs.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+qs.onload=()=>{try{new QRCode($('qr'),{text:SU,width:132,height:132})}catch(e){$('qr').remove()}};qs.onerror=()=>$('qr').remove();document.head.appendChild(qs);
+$('cplink').onclick=async()=>{try{await navigator.clipboard.writeText(SU);toast('Link copied')}catch(e){toast('Copy blocked: select the link manually')}};
+const MI={'transfer (x402)':['x402 / ERC-3009','transferWithAuthorization(from,to,value)','Transfer'],'createJob + fund':['ERC-8183','createJob(provider,expiredAt,description); fund(jobId,budget)','JobCreated, JobFunded'],'submit':['ERC-8183','submit(jobId,deliverableRef)','JobSubmitted'],'settle':['ERC-8183','settle(jobId)','JobCompleted, PaymentReleased'],'reject + refund':['ERC-8183','reject(jobId)','JobRejected, Refunded'],'giveFeedback':['ERC-8004','giveFeedback(agentId,score)','FeedbackGiven']};
+const tm=document.createElement('div');tm.id='txm';tm.hidden=true;
+tm.innerHTML=`<div class="txc" role="dialog" aria-label="Transaction details"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><b>Transaction details</b><button class="btn" id="txx" style="padding:2px 10px">✕</button></div><div id="txb"></div><p class="mut" style="font-size:12px">Simulated. Function and event names are illustrative.</p></div>`;document.body.appendChild(tm);
+function showTx(i){const x=TX[i],m=MI[x.m]||['','',''];const rows=[['Transaction hash',`<span class="xh">${x.h}</span>`],['Status','<span class="ok">✔ Success</span>'],['Block',x.b.toLocaleString()],['Timestamp',new Date(x.t).toUTCString()],['Method',x.m],['Protocol',m[0]],['From',x.f],['To',x.to],['Value',x.v+' BNB'],['Gas fee','0 BNB (sponsored)'],['Task',x.task||'-'],['Worker',x.w||'-'],['Decoded input',m[1]],['Events',m[2]]];
+ $('txb').innerHTML=rows.map(r=>`<div class="txr"><span>${r[0]}</span><span>${r[1]}</span></div>`).join('');tm.hidden=false}
+function xr(){if(!TX.length)return;$('xb').textContent='Latest block #'+blk.toLocaleString()+' · '+TX.length+' txns · click a row for details';const s=Math.max(0,TX.length-10);
+ $('xt').innerHTML=TX.slice(s).map((x,k)=>({x,i:s+k})).reverse().map(({x,i},j)=>`<tr data-i="${i}" tabindex="0" style="cursor:pointer" class="${j?'':'new'}"><td class="xh">${x.h}</td><td><span class="mth">${x.m}</span></td><td>${x.b.toLocaleString()}</td><td>${ago((Date.now()-x.t)/1000|0)}</td><td class="mono">${x.f}</td><td class="mono">${x.to}</td><td>${x.v} BNB</td></tr>`).join('')}
+$('xt').onclick=e=>{const tr=e.target.closest('tr[data-i]');if(tr)showTx(+tr.dataset.i)};
+$('xt').onkeydown=e=>{const tr=e.target.closest('tr[data-i]');if(e.key==='Enter'&&tr)showTx(+tr.dataset.i)};
+$('txx').onclick=()=>tm.hidden=true;tm.onclick=e=>{if(e.target===tm)tm.hidden=true};addEventListener('keydown',e=>{if(e.key==='Escape')tm.hidden=true});
+const _log2=log;log=function(t,c,k){const n=TX.length,r=_log2(t,c,k);if(TX.length>n){const x=TX[TX.length-1];x.task=T[task].n;x.w=sel?sel.name:''}return r};
+let narrOn=false,nbusy=false;
+const nb=document.createElement('button');nb.className='btn';nb.textContent='📢 Narrate: off';nb.style.cssText='padding:2px 10px;font-size:12px';
+$('chead').insertBefore(nb,$('cx'));nb.onclick=()=>{narrOn=!narrOn;nb.textContent='📢 Narrate: '+(narrOn?'on':'off')};
+new MutationObserver(async()=>{const t=$('cap').textContent;if(!narrOn||nbusy||!window.__sample||!/^(Approved|Rejected)/.test(t))return;nbusy=true;
+ try{const r=await __sample(`You are the host of a live pitch demo for SentinelMarket (agents hire, pay and judge other agents on BNB Chain). In ONE punchy sentence (max 25 words, no markdown) narrate what just happened: ${t} Worker: ${sel?sel.name:'unknown'}. Treasury ${S.bal.toFixed(3)} BNB.`,{cache:false});__chatAdd('b',r.text)}catch(e){}nbusy=false}).observe($('cap'),{childList:true,characterData:true,subtree:true});
+async function demo(){const b=$('demo');if(b.dataset.run){dstop=true;return}if(S.busy)return;
+ b.dataset.run=1;b.textContent='■ Stop demo';dstop=false;const m0=mult,s0=$('strict').value;mult=1;document.body.classList.add('pres');scrollTo({top:0,behavior:'smooth'});
+ const view=el=>el.scrollIntoView({behavior:'smooth',block:'center'}),pipe=document.querySelector('.pipe');let p;
+ try{
+  narr('Meet the Sentinel: an autonomous agent that sells crypto risk alerts.');await wait(4500);
+  view(pipe);narr('Every stage maps to a real protocol: x402, ERC-8004, ERC-8183, A2A and a verifier.');await wait(4000);
+  Q('.task')[0].click();p=job();narr('A subscriber pays via x402. The Sentinel hires the best worker by reputation.');await wait(2400);
+  narr('The fee is locked in ERC-8183 escrow while the worker delivers.');await wait(2400);narr('A verifier scores the result before any money moves.');await p;await wait(1000);
+  narr('Now the audience gets involved. A request arrives…');await wait(2500);Q('.task')[1].click();log(`📨 Audience request: "Rebalance quote for my CAKE-BNB LP" → ${T[1].n}`,'ac','sys');p=job();narr('The Sentinel picks the best worker it can afford.');await p;await wait(800);
+  narr('Now a scam token appears. Subscribers ask for a scan…');p=scRug();await wait(3500);narr('Scan, escrow, verify…');await p;narr('Rug pull caught before anyone lost money.');await wait(3000);
+  narr('A weak worker slips in…');p=scBlack();await wait(2500);narr('Verification fails. Funds refunded.');await p;narr('Reputation slashed. Blacklisted for good.');await wait(3000);
+  setStrict(85);narr('The verifier turns strict: only top-quality work gets paid.');Q('.task')[0].click();p=job();await wait(3000);narr('Higher bar, more refunds. Buyers stay protected.');await p;setStrict(s0);await wait(1200);
+  view(xw);narr('Every step is an on-chain transaction. Click any row for details.');await wait(5000);
+  view(pw);narr('Every alert earns a margin, so the Sentinel funds itself. Reputation decides who gets hired next.');await wait(5500);
+  view($('arch'));narr('Under the hood: x402 payments, ERC-8183 escrow, ERC-8004 identity, built with BNB Agent Studio.');await wait(6000);
+  view(pipe);Q('.task')[2].click();p=job();narr('One more job. Hiring is automatic and trust is earned on-chain.');await p;await wait(1200);
+  view($('share'));narr('Agents that hire, pay and judge other agents. Scan the QR to try it.');await wait(5000);
+ }catch(e){}finally{narr('');mult=m0;setStrict(s0);delete b.dataset.run;b.textContent='🎬 90s auto-demo'}}
+$('demo').textContent='🎬 90s auto-demo';$('demo').onclick=demo;
+setInterval(xr,2000);
+perf();
+render();
+</script></body></html>
