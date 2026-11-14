@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Portfolio</title>
+    <meta name="description" content="Hasan Khair Adzman: graphic designer, full-stack engineer, aerospace engineer and AI/ML researcher based in Kuala Lumpur." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="loader"><span>loading</span></div>
+    <canvas id="scene"></canvas>
+    <div id="cursor"></div>
+
+    <nav class="nav">
+      <a href="#home" class="logo" data-name></a>
+      <ul>
+        <li><a href="#about">About</a></li>
+        <li><a href="#experience">Experience</a></li>
+        <li><a href="#projects">Work</a></li>
+        <li><a href="#skills">Skills</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+
+    <main>
+      <section id="home" class="hero">
+        <p class="mono eyebrow">Hi, my name is</p>
+        <h1 class="title" data-name></h1>
+        <h2 class="subtitle"><span id="typed"></span><span class="caret">|</span></h2>
+        <p class="lead" data-tagline></p>
+        <div class="cta">
+          <a href="#projects" class="btn primary">View my work</a>
+          <a href="#contact" class="btn">Get in touch</a>
+        </div>
+        <div class="scroll-hint mono">scroll ↓</div>
+      </section>
+
+      <section id="about" class="panel right">
+        <h3 class="section-title"><span class="mono">01.</span> About me</h3>
+        <div class="card reveal" id="about-text"></div>
+        <div class="stats reveal" id="stats"></div>
+      </section>
+
+      <section id="experience" class="panel">
+        <h3 class="section-title"><span class="mono">02.</span> Experience</h3>
+        <ol class="timeline" id="experience-list"></ol>
+        <p class="other-exp reveal" id="other-experience"></p>
+        <h4 class="sub-title reveal">Education</h4>
+        <ul class="edu-list" id="education-list"></ul>
+      </section>
+
+      <section id="projects" class="panel right">
+        <h3 class="section-title"><span class="mono">03.</span> Research &amp; work</h3>
+        <div class="projects" id="project-list"></div>
+      </section>
+
+      <section id="skills" class="panel">
+        <h3 class="section-title"><span class="mono">04.</span> Skills</h3>
+        <div class="skills reveal" id="skill-list"></div>
+        <h4 class="sub-title reveal">Certifications</h4>
+        <ul class="cert-list reveal" id="cert-list"></ul>
+      </section>
+
+      <section id="contact" class="panel center">
+        <h3 class="section-title"><span class="mono">05.</span> Let's be partners</h3>
+        <p class="lead reveal">Need a solution for your company, a research collaborator, or a designer? My inbox is always open and I'll get back to you.</p>
+        <a class="btn primary big reveal" id="email-btn">Say hello</a>
+        <div class="socials reveal" id="socials"></div>
+        <footer class="mono">Designed &amp; built by <span data-name></span></footer>
+      </section>
+    </main>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
